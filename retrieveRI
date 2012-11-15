@@ -1,0 +1,27 @@
+#!/bin/bash
+RICDIR=/home/naniw/homepage/RIC;
+
+function clearRecord()
+{
+    [ $# -eq 0 ] && echo usage $0 host && exit 1;
+    cat ~/.ssh/known_hosts|grep -v $1 >/tmp/known_hosts ;
+    mv /tmp/known_hosts ~/.ssh
+}
+function convert_csv ()
+{
+    awk -F";" 'NR>2&&$11!=""{print "<td>" $1 "</td><td>" $3 "</td><td>" $9 "</td><td>" $11 "</td><td>" $4"-"$5 "</td></tr>" }'  $RICDIR/*_absrie.csv
+    awk -F";" 'NR>2&&$12!=""{print "<td>" $1 "</td><td>" $3 "</td><td>" $11 "</td><td>" $12 "</td><td>" $4"-"$5 "</td></tr>" }'  $RICDIR/*_abtrie.csv
+    awk -F";" 'NR>2&&$10!=""{print "<td>" $1 "</td><td>" $2 "</td><td>" $8 "</td><td>" $10 "</td><td>" $3"-"$4 "</td></tr>" }'  $RICDIR/*_atcrie.csv
+    awk -F";" 'NR>2&&$11!=""{print "<td>" $1 "</td><td>" $3 "</td><td>" $9 "</td><td>" $11 "</td><td>" $4"-"$5 "</td></tr>" }'  $RICDIR/*_amerie.csv;
+    rm -rf $RICDIR/*csv;
+}
+
+
+for host in $(cat $RICDIR/OMCRList)
+do
+    clearRecord $host;
+    expect $RICDIR/scpFrom $host $RICDIR;
+    convert_csv $host|sed "s/\s+//"|grep -v "??"|grep -v ERROR|grep -v Empty|grep -v "\-\-\-"|grep -v "<td></td>"|sed "s/^/\<tr\>\<td\>$host\<\/td\>/" >> $RICDIR/currentnew.ri
+done
+
+mv $RICDIR/currentnew.ri $RICDIR/current.ri
