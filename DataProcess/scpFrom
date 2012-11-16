@@ -1,0 +1,13 @@
+#!/bin/expect
+# Before this script is called, there should be no entry in ~/.ssh/known_hosts for the target host
+# This script download all RI csv to specified directory
+# Ensured only on solaris
+# WANGNAN 2012-11-15
+set host [lindex $argv 0]
+set storage [lindex $argv 1]
+spawn scp axadmin@$host:/alcatel/var/share/AFTR/ARIE/*.csv $storage
+expect "Are you sure you want to continue connecting (yes/no)?"
+send "yes\n"
+expect "Password: "
+send "omc3\n"
+interact
