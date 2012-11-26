@@ -17,7 +17,7 @@ function csv2html ()
     awk -F";" 'NR>2{print "<td>" $1 "</td><td>" $3 "</td><td>" $11 "</td><td>" $12 "</td><td>" $4"-"$5 "</td></tr>" }'  $TEMPDIR/*_abtrie.csv
     awk -F";" 'NR>2{print "<td>" $1 "</td><td>" $2 "</td><td>" $8 "</td><td>" $10 "</td><td>" $3"-"$4 "</td></tr>" }'  $TEMPDIR/*_atcrie.csv
     awk -F";" 'NR>2{print "<td>" $1 "</td><td>" $3 "</td><td>" $9 "</td><td>" $11 "</td><td>" $4"-"$5 "</td></tr>" }'  $TEMPDIR/*_amerie.csv;
-    rm -rf $TEMPDIR/*csv;
+#rm -rf $TEMPDIR/*csv;
 }
 
 function flush_RI ()
@@ -31,12 +31,12 @@ function flush_RI ()
 function ProcessRIFrom ()
 {
 
-#Refresh
-    flush_RI $host >>/dev/null;
-#Copy to local
+#Flush
+#    flush_RI $host >>/dev/null;
+#scp to local
     clearRecord $host >>/dev/null;
     expect $(cd "$(dirname "$0")"; pwd)/scpFrom $host $TEMPDIR >>/dev/null;
-#Process
+#convert
     csv2html >>$TEMPDIR/raw.ri;
     cat $TEMPDIR/raw.ri|grep -v "???"|grep -v ERROR|grep -v Empty|grep -v "\-\-\-"|grep -v "<td></td>"|sed "s/^/\<tr\>\<td\>$host\<\/td\>/" >> currentnew.ri;
     rm $TEMPDIR/raw.ri;
