@@ -5,7 +5,7 @@
 # WANGNAN 2012-11-15
 set host [lindex $argv 0]
 set storage [lindex $argv 1]
-spawn scp axadmin@$host:/alcatel/var/share/AFTR/ARIE/*.csv $storage
+spawn /usr/local/bin/scp axadmin@$host:/alcatel/var/share/AFTR/ARIE/*.csv $storage
 expect "Are you sure you want to continue connecting (yes/no)?"
 send "yes\n"
 expect "Password: "

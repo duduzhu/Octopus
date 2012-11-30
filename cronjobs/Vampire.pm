@@ -1,11 +1,11 @@
 #!/usr/bin/perl
-package RemoteInventory;
+package Vampire;
 use strict;
 use DBI;
 
 sub dbinit
 {
-    DBI->connect('DBI:mysql:vampire;host=localhost', 'user', 'user');
+    DBI->connect('DBI:mysql:vampire;host=172.24.12.75', 'user', 'user');
 }
 
 sub update_record

@@ -1,2 +1,2 @@
 #!/bin/bash
-echo "0 * * * * cd $PWD; bash portal.sh;";
+echo "0 * * * * cd $(cd "$(dirname "$0")"; pwd); bash portal.sh;";

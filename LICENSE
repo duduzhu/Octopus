@@ -1,4 +1,7 @@
+Follow requirements inherited from all opensource component(List at bottom).
 Free to use in Alcatel-Lucent.
-Must be distributed with Author's Name.
-No modification allowed until informing author.
-No business usage until informing author.
+Licensed under a CC A-N-N 3.0 Unported License.
+
+OpenSourceComponent:
+jQuery
+CodeIgnitor

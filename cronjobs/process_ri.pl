@@ -1,8 +1,8 @@
 #!/usr/bin/perl
 use strict;
 use DBI;
-use RemoteInventory;
-my $dbh=RemoteInventory::dbinit();
+use Vampire;
+my $dbh=Vampire::dbinit();
 
 foreach (@ARGV)
 {
@@ -36,7 +36,7 @@ foreach (@ARGV)
         }
         if(exists $ENV{$formated[2]})
         {
-            RemoteInventory::update_record($formated[0],$formated[1],$formated[2],$formated[3], "", $dbh,$formated[4],$formated[5]);
+            Vampire::update_record($formated[0],$formated[1],$formated[2],$formated[3], "", $dbh,$formated[4],$formated[5]);
         }
     }
 }

@@ -1,7 +1,6 @@
 #!/bin/bash
-ROOT=$(cd "$(dirname "$0")"; pwd);
-. $ROOT/config.sh
-. $ROOT/ProcessMethod
+. config.sh
+. ProcessMethod
 
 for host in $OMCRList
 do
@@ -10,4 +9,5 @@ do
     expect scpFrom $host $TEMPDIR >>/dev/null;
 done
 
-perl process_csv.pl $TEMPDIR/*csv;
+perl process_ri.pl $TEMPDIR/*csv;
+#perl process_ip.pl *ip.csv;

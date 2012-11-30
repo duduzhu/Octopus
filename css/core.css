@@ -1,0 +1,117 @@
+﻿body {
+	padding: 0 10px;
+	font: normal 82.5% "Lucida Grande", Helvetica, Verdana, Arial;
+}
+	
+p { margin: 10px 0; }
+
+
+li { margin-left: 10px; }
+
+h3 { margin: 5px 0; }
+
+.bgred { background-color: red; }
+.blue { color: blue; }
+.green { color: green; }
+
+#rating {
+	border: 1px solid black;
+	margin: 5px;
+	padding: 5px;
+}
+button, select, input, textarea {
+
+	width: 300px;
+}
+
+table {
+/*	width: 100%; */
+	border: 0px;
+    margin: auto;
+           /* 20px 0 20px 0 !important;
+	/*border: 1px solid #666;*/
+}
+
+th, td {
+	padding: 2px 4px 2px 4px !important;
+	text-align: left;
+	vertical-align: top;
+}
+
+th {
+	background-color: #fc0;
+}
+
+th:hover {
+	background-color: #fb7;
+}
+
+.showlist tbody tr:nth-child(even) {
+	background-color: #ccc;
+}
+
+/*.profile tbody tr td:nth-child(even) {
+	background-color: #ccc;
+}*/
+tr a {
+	/*color: rgb(102, 102, 102);*/
+	text-decoration: none;
+}
+tr a:hover {
+	text-decoration: underline;
+}
+
+dl dd {
+	margin-left: 10px;
+}
+
+dl dt {
+	font-weight: bold;
+}
+
+dl {
+	border: 1px solid black;
+	margin: 5px;
+}
+
+.highlight {
+	border: 5px dotted #eee;
+}
+
+.error {
+	background-color: #fee;
+}
+
+div{
+}
+
+div.profileframe{
+	/*border: thin solid #000000;*/
+}
+div#outer { 
+    width: 65%; 
+    background-color:#FFFFFF; 
+    margin-top: 50px; 
+    margin-bottom: 50px; 
+    margin-left: auto; 
+    margin-right: auto; 
+    padding: 0px; 
+}
+div#nav { 
+    /*width: 25%; */
+    padding: 10px; 
+    margin-top: 1px; 
+    /*float: left; */
+    border-bottom: thin solid #000000; 
+}
+div#main { 
+    /*margin-left: 20%; */
+    margin-top: 1px; 
+    padding: 10px; 
+}
+div#footer { 
+    text-align: center;
+    padding: 15px; 
+    margin: 0px; 
+    border-top: thin solid #000000; 
+}
