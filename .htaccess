@@ -1,0 +1,8 @@
+AllowOverride None
+AuthType NTLM
+NTLMAuth on
+NTLMAuthoritative on
+NTLMDomain AD4
+#NTLMServer cnshasidc01.ad4.ad.alcatel.com
+NTLMServer cnshhsidc01
+Require valid-user
