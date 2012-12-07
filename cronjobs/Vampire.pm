@@ -2,7 +2,7 @@
 package Vampire;
 use strict;
 use DBI;
-use Mail::Sendmail;
+#use Mail::Sendmail;
 
 sub dbinit
 {
@@ -119,7 +119,7 @@ sub detect_user_misalign
     }
     if($mail{Message})
     {
-        sendmail %mail;
+#sendmail %mail;
     }
 }
 sub update_link

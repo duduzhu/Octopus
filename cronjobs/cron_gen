@@ -1,2 +1,10 @@
 #!/bin/bash
-echo "5 * * * * cd $(cd "$(dirname "$0")"; pwd); bash portal.sh;";
+
+crontab -l |grep portal.sh >>/dev/null || {
+    CRONDIR=$(cd "$(dirname "$0")"; pwd);
+    TMPCRON=/tmp/curcrontab;
+    crontab -l >$TMPCRON;
+    echo "5 * * * * . /etc/profile; cd $CRONDIR; bash portal.sh;" >> $TMPCRON;
+    crontab $TMPCRON;
+    echo "crontab updated.";
+}
