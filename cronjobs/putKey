@@ -1,0 +1,153 @@
+#!/usr/bin/expect
+# juemin.a.ye@alcatel-sbell.com.cn
+
+
+global g argv argc 
+
+
+set g(WHICH) "/usr/bin/which"
+set g(PWD)				[ exec $g(WHICH) pwd ]
+set g(PERL)				[ exec $g(WHICH) perl ]
+set g(SSH-KEYGEN)	[ exec $g(WHICH) ssh-keygen ]
+set g(CAT) 				[ exec $g(WHICH) cat ]
+set g(SSH) 				[ exec $g(WHICH) ssh ]
+set g(m_path) [cd ~/.ssh; pwd]
+
+proc Usage {} {
+    puts "openSSH.exp -ip 172.24.179.136 -UID axadmin -passwd omc3"
+    puts "ERR - Illegal input  argument."
+    exit 1
+}
+
+proc ExecuteCmd {cmd} {
+  set rc 1
+  exec echo $cmd >tmpCmd
+  set rc [exec bash tmpCmd]
+  exec rm -rf tmpCmd
+  return $rc
+}
+
+proc getArgument {} {
+  global g argv argc 
+	if { $argc == 6 } {
+		  set i [lsearch $argv "-i"]
+		  if {$i == -1} {
+		       Usage
+		  } else {
+		          set g(m_ip) [lindex $argv [expr $i + 1]]
+		          if ![regexp -- {^\d?\d?[1-9]\.\d?\d?[0-9]\.\d?\d?[0-9].\d?\d?[1-9]} $g(m_ip)] {
+		                  puts "Erro: IP format "
+		                  Usage
+		          }
+		  }
+		  set i [lsearch $argv "-u"]
+		  if {$i == -1} {
+		          set g(m_uid) ""
+		  } else {
+		          set g(m_uid)  [lindex $argv [expr $i + 1]]
+		  }
+		  
+		  set i [lsearch $argv "-p"]
+		  if {$i == -1} {
+		          set g(m_password) ""
+		  } else {
+		          set g(m_password)  [lindex $argv [expr $i + 1]]
+		  }
+			if { "$g(m_ip)" == "" || "$g(m_uid)" == "" || "$g(m_password)" == "" } {  puts 2 ; Usage }
+	} else {
+		Usage
+	}
+}
+
+	
+proc genSSHKey {} {
+	global g
+	
+	exec rm -f $g(m_path)/id_rsa $g(m_path)/id_rsa.pub
+	spawn $g(SSH-KEYGEN) -t rsa
+	while true {
+		expect {
+			eof break
+			"Enter file in which to" {
+				send "$g(m_path)/id_rsa\n"
+			}
+			"Enter passphrase" {
+				send "\n"
+			}
+			"Enter same passphrase" {
+				send "\n"
+			}
+		}
+	} 
+}
+
+proc clearKey {keyfile} {
+	global g
+	ExecuteCmd "$g(PERL) -i -ple 's/$g(m_ip).*//' $keyfile"
+}
+
+proc sendKey {} {
+	global g
+	
+	set ERR_PERMISSION_DENIED 1
+	set ERR_DIR_OR_FILE_NOT_EXIST 2
+	set ERR_TIMEOUT 3
+	set ERR_CONNECTION_REFUSED 4
+	set ERR_INVALID_ARGUMENT 5
+
+	if ![ file exists $g(m_path)/id_rsa ]&&![ file exists $g(m_path)/id_rsa.pub ] {
+		genSSHKey
+	}
+	set m_key_pub [exec $g(CAT) $g(m_path)/id_rsa.pub]
+    set key_key [exec whoami]@[exec hostname];
+#spawn $g(SSH) $g(m_uid)@$g(m_ip) "perl -i -pe 's/^.*$key_key.*$//' ~/.ssh/authorized_keys; echo $m_key_pub >> ~/.ssh/authorized_keys";
+#spawn $g(SSH) $g(m_uid)@$g(m_ip) #"echo THISISKEYDETECTION";
+#send "\n"
+#                send "echo $m_key_pub >> ~/.ssh/authorized_keys\n"
+#                send "exit\n"
+#".*" {
+#                send "exit \n"
+#            }
+    spawn $g(SSH) $g(m_uid)@$g(m_ip) "grep $key_key .ssh/authorized_keys >>/dev/null ||echo $m_key_pub >> .ssh/authorized_keys"
+	set timeout 30
+	while true {
+		expect {
+			eof break
+			"connecting (yes/no)?" {
+				send "yes\n"
+			}
+			"assword:" {
+				send "$g(m_password)\n"
+            }
+			-re "Is a directory|No such file or directory" {
+				expect eof
+				exit $ERR_DIR_OR_FILE_NOT_EXIST
+			}
+			"Connection refused" {
+				expect eof
+				exit $ERR_CONNECTION_REFUSED
+			}
+			#connetion error
+			timeout {
+				exit $ERR_TIMEOUT
+			}
+			"Permission denied, please try again." {
+				exit $ERR_PERMISSION_DENIED
+			}
+			"Host key verification failed." {
+				set tmp $expect_out(buffer)
+				regsub -- {.* in (/.*/.ssh/known_hosts) .*$} $tmp {\1} tmp
+				clearKey $tmp
+				sendKey
+			}
+		}
+	}
+}
+if { $argc == 0 } {
+
+    Usage
+    exit 1
+} else {
+	getArgument
+	sendKey
+}

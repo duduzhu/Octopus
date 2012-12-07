@@ -19,11 +19,19 @@ class Vampire extends CI_Controller {
 	 */
     public function index()
     {
+        $ip_record = $this->db->query('select * from meta where SN = "'.$_SERVER['REMOTE_ADDR'].'"')->result();
+        if(count($ip_record)==1 && $ip_record[0]->USER!=$_SERVER['REMOTE_USER'])
+        {
+            $this->ownmeta($ip_record[0]->id);
+            return;
+        }
+
         if(isset($_REQUEST['category']))
         {
             switch($_REQUEST['category'])
             {
                 case 'myri' : $this->myri(); break;
+                case 'misalign' : $this->misalign(); break;
                 case 'allri' : $this->allri(); break;
                 case 'ownparent' : $this->ownparent(); break;
                 case 'ownmeta' : $this->ownmeta(); break;
@@ -41,6 +49,10 @@ class Vampire extends CI_Controller {
             $this->myri();
         }
     }
+    private function metas_by_parent($id_parent)
+    {
+        return $this->db->query('select id_meta from link where id_parent = '.$id_parent)->result();
+    }
     public function releasemeta()
     {
         $this->db->query('update meta set USER = "" where id = "'.$_REQUEST['meta_id'].'"');
@@ -49,16 +61,28 @@ class Vampire extends CI_Controller {
     public function releaseparent()
     {
         $this->db->query('update parent set USER = "" where id = "'.$_REQUEST['parent_id'].'"');
+        foreach ($this->metas_by_parent($_REQUEST['parent_id']) as $meta_id)
+        {
+            $this->db->query('update meta set USER = "" where id = '.$meta_id->id_meta.' and USER= "'.$_SERVER['REMOTE_USER'].'"');
+        }
         $this->myri();
     }
-    public function ownmeta()
+    public function ownmeta($metaid="")
     {
-        $this->db->query('update meta set USER = "'.$_SERVER['REMOTE_USER'].'" where id = "'.$_REQUEST['meta_id'].'"');
+        if($metaid=="")
+        {
+            $metaid=$_REQUEST['meta_id'];
+        }
+        $this->db->query('update meta set USER = "'.$_SERVER['REMOTE_USER'].'" where id = "'.$metaid.'"');
         $this->myri();
     }
     public function ownparent()
     {
         $this->db->query('update parent set USER = "'.$_SERVER['REMOTE_USER'].'" where id = "'.$_REQUEST['parent_id'].'"');
+        foreach ($this->metas_by_parent($_REQUEST['parent_id']) as $meta_id)
+        {
+            $this->db->query('update meta set USER = "'.$_SERVER['REMOTE_USER'].'" where id = "'.$meta_id->id_meta.'" and USER = "" ');
+        }
         $this->myri();
     }
 
@@ -83,7 +107,7 @@ class Vampire extends CI_Controller {
 
 	public function allri()
 	{
-        $this->ri_with_filter("All euipments",NULL,NULL,NULL);
+        $this->ri_with_filter("All equipments",NULL,NULL,NULL);
 	}
     public function showmetatype()
     {
@@ -125,7 +149,25 @@ class Vampire extends CI_Controller {
     {
         $this->ri_with_filter("Lab IP Address Management",NULL,NULL,"IP");
     }
-    private function ri_with_filter($heading,$user,$parent_sn,$meta_type)
+    private function misalign()
+    {
+        $data['heading']="Misaligned Equipments";
+        $data['table']=array();
+        $link = $this->db->get("link")->result();
+        foreach ($link as $linkrecord)
+        {
+            $row=$this->row_by_record($linkrecord);
+            if($row['parent_user'] && $row['meta_user'] && $row['parent_user'] != $row['meta_user'])
+            {
+                array_push($data['table'], $row);
+            }
+        }
+
+		$this->load->view('header');
+		$this->load->view('show_record',$data);
+		$this->load->view('tail');
+    }
+    private function ri_with_filter($heading,$user,$parent_id,$meta_type)
     {
         $data['heading']=$heading;
         $data['table']=array();
@@ -141,7 +183,7 @@ class Vampire extends CI_Controller {
             {
                 continue;
             }
-            if(!is_null($parent_sn) && $row['parent_sn'] != $parent_sn)
+            if(!is_null($parent_id) && $row['parent_id'] != $parent_sn)
             {
                 continue;
             }

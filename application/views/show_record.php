@@ -9,7 +9,7 @@ if(isset($heading))
 ?>
 <table align="center" border="0" cellpadding="0" cellspacing="1" id="ri" class="showlist">
 <tbody>
-<tr><th>Equipment</th><th>Equipment</th><th>USER</th><th>RESOURCE</th><th>SN</th><th>USER</th><th>LastUpdate</th></tr>
+<tr><th>Click!</th><th>Equip</th><th>Label</th><th>USER</th><th>NAME</th><th>SN</th><th>USER</th><th>LastUpdate</th></tr>
 <?php 
 foreach($table as $row)
 {
@@ -17,6 +17,10 @@ foreach($table as $row)
     if($row['parent_user']!="" && $row['meta_user']!="" && $row['meta_user']!=$row['parent_user'])
     { ?> style="color:red" <?php }
     echo ">";
+    echo "<td>";
+    if($row['parent_user']!="" && $row['meta_user']!="" && $row['meta_user']!=$row['parent_user'])
+    { ?> <img src="img/alert_16.png" /> <?php }
+    echo "</td>";
 
     echo "<td>";
     echo $row['parent_type'];

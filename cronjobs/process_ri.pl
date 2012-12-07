@@ -1,6 +1,5 @@
 #!/usr/bin/perl
 use strict;
-use DBI;
 use Vampire;
 my $dbh=Vampire::dbinit();
 
@@ -34,10 +33,11 @@ foreach (@ARGV)
             $clean =~ s/(^\W+|\W+$)//g;
             @formated=(@formated,$clean);
         }
-        if(exists $ENV{$formated[2]})
+        if(exists $ENV{$formated[2]} && $formated[0] && $formated[1] && $formated[3] )
         {
             Vampire::update_record($formated[0],$formated[1],$formated[2],$formated[3], "", $dbh,$formated[4],$formated[5]);
         }
     }
+    close SOURCE;
 }
 $dbh->disconnect();

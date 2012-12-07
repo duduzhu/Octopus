@@ -4,6 +4,11 @@ my ($subnet, $mask) = @ARGV;
 my @subnet = split /\./, $subnet;
 my @mask = split /\./, $mask;
 
+$subnet[0]=0+$subnet[0]&0+$mask[0];
+$subnet[1]=0+$subnet[1]&0+$mask[1];
+$subnet[2]=0+$subnet[2]&0+$mask[2];
+$subnet[3]=0+$subnet[3]&0+$mask[3];
+
 sub num2ip
 {
     my ($number) = @_;
@@ -25,7 +30,8 @@ sub ip2num
     my @ip = split /\./, $ip;
     return $ip[0]*255*255*255 + $ip[1]*255*255 + $ip[2]*255 + $ip[3];
 }
-my $ip = &ip2num($subnet) + 1;
+
+my $ip = &ip2num("$subnet[0].$subnet[1].$subnet[2].$subnet[3]") + 1;
 my $MAC="";
 $mask[0] = 255 - $mask[0];
 $mask[1] = 255 - $mask[1];
@@ -35,16 +41,16 @@ my $ip_num = $mask[0]*255*255*255 + $mask[1]*255*255 + $mask[2]*255 + $mask[3] -
 
 while ($ip_num>0)
 {
-    $MAC;
     system("ping ".&num2ip($ip)." 1 >>/dev/null");
     my $arpcmd = 'arp '.&num2ip($ip);
     my $arpecho=`$arpcmd`;
     chomp($arpecho);
-    if($arpecho =~ /.*\ at (.*\:..\:..\:..\:..\:..)$/)
+    my @arpecho = split /\ /, $arpecho;
+    $MAC=$arpecho[3];
+    if($MAC=~/.+\:.+\:.+\:.+\:.+\:.+/)
     {
-        $MAC=$1;
+        print("MAC;".$MAC.";IP;".&num2ip($ip)."\n");
     }
     $ip_num-=1;
     $ip+=1;
-    print("MAC;".$MAC.";IP;".&num2ip($ip)."\n");
 }

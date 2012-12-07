@@ -36,8 +36,8 @@ ul, ol, dl, li, dt, dd {
 /* Links
 ------------------------------*/
 
-a, a:link {text-decoration: none; color: blue;}
-a:visited {text-decoration: none; color: blue;}
+a, a:link {text-decoration: none;color: black;}
+a:visited {text-decoration: none;color: black;}
 a:hover {text-decoration: underline; color: white;}
 a:active {}
 

@@ -2,6 +2,7 @@
 package Vampire;
 use strict;
 use DBI;
+use Mail::Sendmail;
 
 sub dbinit
 {
@@ -82,30 +83,50 @@ sub get_or_insert
 
 sub detect_user_misalign
 {
+    my %mail = ( To    => $ENV{REPORT_MAIL},
+                 From      => 'Vampire@'.`hostname`,
+                 Subject => '[Vampire] Misalign warning on '.`date`,
+                 Message => ""
+               );
     my ($meta_id, $dbh) = @_;
-    my $sth = $dbh->prepare("SELECT id_parent FROM link where id_meta=\'$meta_id\'");
-    $sth->execute();
-    my $parent_id=$sth->fetchrow();
-
-    my $meta_user = &get_user($meta_id, "meta", $dbh);
-    my $parent_user = &get_user($parent_id, "parent", $dbh);
-
-    if($meta_user && $parent_user && $meta_user ne $parent_user)
+    my $sth;
+    if($meta_id)
     {
-        my $sth = $dbh->prepare("SELECT * FROM meta where id=\'$meta_id\'");
+        $sth = $dbh->prepare("SELECT * FROM link where id_meta=\'$meta_id\'");
+    }
+    else
+    {
+        $sth = $dbh->prepare("SELECT * FROM link");
+    }
+    $sth->execute();
+    while(my $row=$sth->fetchrow_hashref())
+    {
+
+        my $meta_user = &get_user($row->{id_meta}, "meta", $dbh);
+        my $parent_user = &get_user($row->{id_parent}, "parent", $dbh);
+
+        if($meta_user && $parent_user && $meta_user ne $parent_user)
+        {
+        my $sth = $dbh->prepare("SELECT * FROM meta where id=\'$row->{id_meta}\'");
         $sth->execute();
         my $result = $sth->fetchrow_hashref();
-        print "$meta_user loses control of $result->{MNEMONIC}-$result->{SN}, it is attached to ";
-        $sth = $dbh->prepare("SELECT * FROM parent where id=\'$parent_id\'");
+        $mail{Message} .= "$meta_user loses control of $result->{MNEMONIC}-$result->{SN}, it is attached to ";
+        $sth = $dbh->prepare("SELECT * FROM parent where id=\'$row->{id_parent}\'");
         $sth->execute();
         $result = $sth->fetchrow_hashref();
-        print "$result->{MNEMONIC}-$result->{SN} of $parent_user\n";
+        $mail{Message} .= "$result->{MNEMONIC}-$result->{SN} of $parent_user\n";
+        }
+    }
+    if($mail{Message})
+    {
+        sendmail %mail;
     }
 }
 sub update_link
 {
     use HTTP::Date;
     my $recordtimestamp;
+    my $lasttimestamp;
     my ($meta_id, $parent_id, $date, $time, $dbh) = @_;
     my $sth = $dbh->prepare("SELECT id_parent FROM link where id_meta=\'$meta_id\'");
     $sth->execute();
@@ -123,22 +144,26 @@ sub update_link
 
     if(my $current_parent = $sth->fetchrow())
     {
+        $lasttimestamp=$sth->fetchrow();
         if($parent_id ne $current_parent)
+        #Things changed
         {
             $sth = $dbh->prepare("SELECT TIMESTAMP FROM link where id_meta=\'$meta_id\'");
             $sth->execute();
-            my $lasttimestamp=$sth->fetchrow();
             if(str2time($recordtimestamp) gt str2time($lasttimestamp))
             {
-                $dbh->do("INSERT INTO history (id_meta, id_parent, TIMESTAMP) VALUES ($meta_id, \'$current_parent\', \'$lasttimestamp\')");
+                $dbh->do("INSERT INTO history (id_meta, id_parent, TIMESTAMP) VALUES ($meta_id, \'$parent_id\', \'$recordtimestamp\')");
                 $dbh->do("UPDATE link SET id_parent=\'$parent_id\' where id_meta=\'$meta_id\'");
-                $dbh->do("UPDATE link SET TIMESTAMP=\'$recordtimestamp\' where id_meta=\'$meta_id\'");
             }
         }
+
+        $dbh->do("UPDATE link SET TIMESTAMP=\'$recordtimestamp\' where id_meta=\'$meta_id\'");
     }
     else
+    #It does not exist
     {
         $dbh->do("INSERT INTO link (id_meta, id_parent, TIMESTAMP) VALUES(\'$meta_id\',\'$parent_id\',\'$recordtimestamp\')");
+        $dbh->do("INSERT INTO history (id_meta, id_parent, TIMESTAMP) VALUES(\'$meta_id\',\'$parent_id\',\'$recordtimestamp\')");
     }
     &detect_user_misalign($meta_id,$dbh);
 }

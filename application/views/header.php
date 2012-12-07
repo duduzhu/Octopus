@@ -15,8 +15,10 @@
 <h1 align="center" >Vampire System</h1>
 <div id=nav align="right" >
 <a href="?category=myri">My Equipment</a>&nbsp;
+<a href="?category=misalign">Misalign Equipment</a>&nbsp;
 <a href="?category=allri">All Equipment</a>&nbsp;
 <a href="?category=ip">Lab IP</a>&nbsp;
-<?=$_SERVER['REMOTE_USER']?>
+<?=$_SERVER['REMOTE_USER']?>&nbsp;
+<?=$_SERVER['REMOTE_ADDR']?>
 </div> <!-- nav -->
 <div id="main" >
