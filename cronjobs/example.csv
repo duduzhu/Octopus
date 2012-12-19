@@ -1,0 +1,13 @@
+# This is comment, start with #
+# The first column is the name of Equipment on which resource is attached
+# The second column is the ID of Equipment
+# The third column is the name of resource
+# The fourth column is the ID of resource
+MAC;0:e0:b1:99:30:28;IP;172.24.229.129
+MAC;0:14:4f:85:ca:8e;IP;172.24.229.145
+MAC;0:3:ba:1b:18:f7;IP;172.24.229.162
+MAC;0:14:4f:1e:51:81;IP;172.24.229.239
+MAC;2:a0:98:24:23:14;IP;172.24.229.243
+MAC;2:a0:98:d:48:b8;IP;172.24.229.244
+MAC;2:a0:98:2:3c:d9;IP;172.24.229.252
+MAC;2:a0:98:2:3d:81;IP;172.24.229.253
