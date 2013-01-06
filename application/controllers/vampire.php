@@ -17,10 +17,27 @@ class Vampire extends CI_Controller {
 	 * map to /index.php/welcome/<method_name>
 	 * @see http://codeigniter.com/user_guide/general/urls.html
 	 */
+    function get_current_user()
+    {
+        if(isset($_SESSION['ad4']))
+        {
+            return $_SESSION['ad4'];
+        }
+        else
+        {
+            return "anonymous";
+        }
+    }
+    function __construct()
+    {
+        parent::__construct();
+        $this->load->helper(array('form','url'));
+        session_start();
+    }
     public function index()
     {
-        $ip_record = $this->db->query('select * from meta where SN = "'.$_SERVER['REMOTE_ADDR'].'"')->result();
-        if(count($ip_record)==1 && $ip_record[0]->USER!=$_SERVER['REMOTE_USER'])
+        $ip_record = $this->db->query('select * from meta where SN = "'.$this->get_current_user().'"')->result();
+        if(count($ip_record)==1 && $ip_record[0]->USER!=$this->get_current_user())
         {
             $this->ownmeta($ip_record[0]->id);
             return;
@@ -31,6 +48,8 @@ class Vampire extends CI_Controller {
             switch($_REQUEST['category'])
             {
                 case 'myri' : $this->myri(); break;
+                case 'upload' : $this->upload(); break;
+                case 'do_upload' : $this->do_upload(); break;
                 case 'misalign' : $this->misalign(); break;
                 case 'allri' : $this->allri(); break;
                 case 'ownparent' : $this->ownparent(); break;
@@ -42,12 +61,77 @@ class Vampire extends CI_Controller {
                 case 'releasemeta' : $this->releasemeta(); break;
                 case 'releaseparent' : $this->releaseparent(); break;
                 case 'ip' : $this->ip(); break;
+                case 'adm' : $this->adm(); break;
+                case 'login' : $this->login(); break;
+                case 'logout' : $this->logout(); break;
             }
         }
         else
         {
-            $this->myri();
+            $this->login();
         }
+    }
+    private function upload($error=array('error' => ''))
+    {
+        $this->load->view('header', array('vampireuser' => $this->get_current_user()));
+        $this->load->view('upload_csv', $error);
+        $this->load->view('tail');
+    }
+    private function logout()
+    {
+        $_SESSION['ad4']='anonymous';
+        session_destroy();
+        $this->login();
+    }
+    private function registerad4($user)
+    {
+        session_register('ad4');
+        $_SESSION['ad4']=$user;
+    }
+    private function login()
+    {
+        if(isset($_SERVER['REMOTE_USER']))
+        {
+            $this->registerad4($_SERVER['REMOTE_USER']);
+            $this->myri();
+            return;
+        }
+        if(isset($_REQUEST['ad4']))
+        {
+            $this->registerad4($_REQUEST['ad4']);
+            $this->myri();
+            return;
+        }
+        {
+            $this->load->view('header', array('vampireuser' => $this->get_current_user()));
+            $this->load->view('login');
+            $this->load->view('tail');
+        }
+    }
+    private function do_upload()
+    {
+        $config['upload_path']='./uploads/';
+        $config['allowed_types']='*';
+        $config['max_size']='10240';
+        $this->load->library('upload',$config);
+        if ( ! $this->upload->do_upload())
+        {
+            $error = array('error' => $this->upload->display_errors());
+            $this->upload($error);
+        }
+        else
+        {
+            $uploaddata=$this->upload->data();
+            $cmd="perl cronjobs/process.pl uploads/".$uploaddata['file_name'];
+            $this->success_upload(`$cmd`);
+        }
+    }
+    private function success_upload($message="")
+    {
+        $this->load->view('header', array('vampireuser' => $this->get_current_user()));
+        echo "Upload Successfully.<br/>";
+        echo $message;
+        $this->load->view('tail');
     }
     private function metas_by_parent($id_parent)
     {
@@ -63,7 +147,7 @@ class Vampire extends CI_Controller {
         $this->db->query('update parent set USER = "" where id = "'.$_REQUEST['parent_id'].'"');
         foreach ($this->metas_by_parent($_REQUEST['parent_id']) as $meta_id)
         {
-            $this->db->query('update meta set USER = "" where id = '.$meta_id->id_meta.' and USER= "'.$_SERVER['REMOTE_USER'].'"');
+            $this->db->query('update meta set USER = "" where id = '.$meta_id->id_meta.' and USER= "'.$this->get_current_user().'"');
         }
         $this->myri();
     }
@@ -73,15 +157,15 @@ class Vampire extends CI_Controller {
         {
             $metaid=$_REQUEST['meta_id'];
         }
-        $this->db->query('update meta set USER = "'.$_SERVER['REMOTE_USER'].'" where id = "'.$metaid.'"');
+        $this->db->query('update meta set USER = "'.$this->get_current_user().'" where id = "'.$metaid.'"');
         $this->myri();
     }
     public function ownparent()
     {
-        $this->db->query('update parent set USER = "'.$_SERVER['REMOTE_USER'].'" where id = "'.$_REQUEST['parent_id'].'"');
+        $this->db->query('update parent set USER = "'.$this->get_current_user().'" where id = "'.$_REQUEST['parent_id'].'"');
         foreach ($this->metas_by_parent($_REQUEST['parent_id']) as $meta_id)
         {
-            $this->db->query('update meta set USER = "'.$_SERVER['REMOTE_USER'].'" where id = "'.$meta_id->id_meta.'" and USER = "" ');
+            $this->db->query('update meta set USER = "'.$this->get_current_user().'" where id = "'.$meta_id->id_meta.'" and USER = "" ');
         }
         $this->myri();
     }
@@ -120,7 +204,7 @@ class Vampire extends CI_Controller {
 
     public function myri()
     {
-        $this->ri_with_filter("Your equipments",$_SERVER['REMOTE_USER'],NULL,NULL);
+        $this->ri_with_filter("Your equipments",$this->get_current_user(),NULL,NULL);
     }
     public function ri_by_user()
     {
@@ -129,28 +213,31 @@ class Vampire extends CI_Controller {
 
     public function showmetahistory()
     {
+        $data['vampireuser']=$this->get_current_user();
         $data['heading']="Resource History";
         $data['table']=array();
-        $linkrecord = $this->db->query("select * from link where id_meta = ".$_REQUEST['meta_id'])->result();
-        $linkrecord = $linkrecord[0];
-        array_push($data['table'], $this->row_by_record($linkrecord));
         $history = $this->db->query("select * from history where id_meta = ".$_REQUEST['meta_id']." order by id desc")->result();
         foreach ($history as $item)
         {
             $row=$this->row_by_record($item);
             array_push($data['table'], $row);
         }
-		$this->load->view('header');
+        $this->load->view('header', array('vampireuser' => $this->get_current_user()));
 		$this->load->view('show_record',$data);
 		$this->load->view('tail');
     }
 
+    public function adm()
+    {
+        $this->ri_with_filter('Lab ADM Ports Mapping <br />Excel: \\\\s3gweb\\GSM_ST\\Platform\\ZHANGJihua',NULL,NULL,'ADM');
+    }
     public function ip()
     {
         $this->ri_with_filter("Lab IP Address Management",NULL,NULL,"IP");
     }
     private function misalign()
     {
+        $data['vampireuser']=$this->get_current_user();
         $data['heading']="Misaligned Equipments";
         $data['table']=array();
         $link = $this->db->get("link")->result();
@@ -163,12 +250,13 @@ class Vampire extends CI_Controller {
             }
         }
 
-		$this->load->view('header');
+        $this->load->view('header', array('vampireuser' => $this->get_current_user()));
 		$this->load->view('show_record',$data);
 		$this->load->view('tail');
     }
-    private function ri_with_filter($heading,$user,$parent_id,$meta_type)
+    private function ri_with_filter($heading,$user,$parent_sn,$meta_type)
     {
+        $data['vampireuser']=$this->get_current_user();
         $data['heading']=$heading;
         $data['table']=array();
         $link = $this->db->get("link")->result();
@@ -183,14 +271,14 @@ class Vampire extends CI_Controller {
             {
                 continue;
             }
-            if(!is_null($parent_id) && $row['parent_id'] != $parent_sn)
+            if(!is_null($parent_sn) && $row['parent_sn'] != $parent_sn)
             {
                 continue;
             }
             array_push($data['table'], $row);
         }
 
-		$this->load->view('header');
+        $this->load->view('header', array('vampireuser' => $this->get_current_user()));
 		$this->load->view('show_record',$data);
 		$this->load->view('tail');
     }

@@ -1,4 +1,4 @@
-﻿body {
+body {
 	padding: 0 10px;
 	font: normal 82.5% "Lucida Grande", Helvetica, Verdana, Arial;
 }
@@ -11,8 +11,8 @@ li { margin-left: 10px; }
 h3 { margin: 5px 0; }
 
 .bgred { background-color: red; }
-.blue { color: blue; }
 .green { color: green; }
+.systemtitle{ color:#225b86; font-size:30px; font-weight: bold;}
 
 #rating {
 	border: 1px solid black;

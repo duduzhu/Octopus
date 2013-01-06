@@ -14,7 +14,7 @@ set g(SSH) 				[ exec $g(WHICH) ssh ]
 set g(m_path) [cd ~/.ssh; pwd]
 
 proc Usage {} {
-    puts "openSSH.exp -ip 172.24.179.136 -UID axadmin -passwd omc3"
+    puts "openSSH.exp -i 172.24.179.136 -u axadmin -p omc3"
     puts "ERR - Illegal input  argument."
     exit 1
 }

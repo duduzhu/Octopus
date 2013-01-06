@@ -5,8 +5,16 @@ if(!@ARGV)
 }
 use strict;
 my ($host_str) = @ARGV;
-`ifconfig -a|grep $host_str` =~ /netmask (.{8}) broadcast/;
+
 my $mask_hex=$1;
+if(`ifconfig -a|grep $host_str` =~ /netmask (.{8}) broadcast/)
+{
+    $mask_hex=$1;
+}
+else
+{
+    exit;
+}
 
 sub num2ip
 {
@@ -27,9 +35,7 @@ my $ip_num=0xFFFFFFFF-(hex $mask_hex)-1;
 
 while ($ip_num>0)
 {
-#system("ping ".&num2ip($ip)." 1 >>/dev/null");
-    print num2ip($ip);print "\n";
-    print $ip_num;print "\n";
+    system("ping ".&num2ip($ip)." 1 >>/dev/null");
     my $arpcmd = 'arp '.&num2ip($ip);
     my $arpecho=`$arpcmd`;
     chomp($arpecho);
@@ -37,7 +43,7 @@ while ($ip_num>0)
     my $MAC=$arpecho[3];
     if($MAC=~/.+\:.+\:.+\:.+\:.+\:.+/)
     {
-#print("MAC;".$MAC.";IP;".&num2ip($ip)."\n");
+        print("MAC;".$MAC.";IP;".&num2ip($ip)."\n");
     }
     $ip_num-=1;
     $ip+=1;
