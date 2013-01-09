@@ -1,12 +1,12 @@
 <form action="?category=login" method="post" accept-charset="utf-8" enctype="multipart/form-data">
 <br />
-ad4:
+CSL:
 <br />
-<input type="text" name="ad4" size="20" />
+<input type="text" name="csl" size="20" />
 <br />
-password:
+CIP:
 <br />
-<input type="password" size="20" />
+<input type="password" name="password" size="20" />
 <br /><br />
 <input type="submit" value="login" />
 

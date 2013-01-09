@@ -19,9 +19,9 @@ class Vampire extends CI_Controller {
 	 */
     function get_current_user()
     {
-        if(isset($_SESSION['ad4']))
+        if(isset($_SESSION['csl']))
         {
-            return $_SESSION['ad4'];
+            return $_SESSION['csl'];
         }
         else
         {
@@ -68,7 +68,10 @@ class Vampire extends CI_Controller {
         }
         else
         {
-            $this->login();
+            if($this->logged())
+                $this->myri();
+            else
+                $this->login();
         }
     }
     private function upload($error=array('error' => ''))
@@ -79,29 +82,70 @@ class Vampire extends CI_Controller {
     }
     private function logout()
     {
-        $_SESSION['ad4']='anonymous';
+        $_SESSION['csl']='anonymous';
         session_destroy();
         $this->login();
     }
-    private function registerad4($user)
+    private function registercsl($user)
     {
-        session_register('ad4');
-        $_SESSION['ad4']=$user;
+        session_register('csl');
+        $_SESSION['csl']=$user;
+    }
+    private function logged()
+    {
+        return isset($_SESSION['csl']);
     }
     private function login()
     {
+        $login_success=false;
+
+        if(isset($_REQUEST['csl']))
+        {
+            $user=trim($_REQUEST['csl']);
+            $password=trim($_REQUEST['password']);
+        }
+        else
+        {
+            $user="";
+            $password="";
+        }
         if(isset($_SERVER['REMOTE_USER']))
         {
-            $this->registerad4($_SERVER['REMOTE_USER']);
-            $this->myri();
-            return;
+            $login_success=true;
+            $user=$_SERVER['REMOTE_USER'];
         }
-        if(isset($_REQUEST['ad4']))
+        else if(isset($user) && $user && isset($password) && $password)
         {
-            $this->registerad4($_REQUEST['ad4']);
+            $ds = ldap_connect('ldapca.na.alcatel.com');
+            @ldap_bind($ds);
+            $search = ldap_search($ds, "o=Alcatel", "uid=".$user);
+            if( ldap_count_entries($ds,$search) == 1 )
+            {
+                $info = ldap_get_entries($ds, $search);
+                $bind = @ldap_bind($ds, $info[0]['dn'], $password);
+                if( !$bind || !isset($bind))
+                {
+                    echo "Login Failed!<br/>";
+                }
+                else
+                {
+                    $login_success=true;
+                }
+                ldap_unbind($ds);
+            }
+            else
+            {
+                echo "Unknow CSL!<br/>";
+            }
+        }
+
+        if($login_success)
+        {
+            $this->registercsl($user);
             $this->myri();
             return;
         }
+        else
         {
             $this->load->view('header', array('vampireuser' => $this->get_current_user()));
             $this->load->view('login');

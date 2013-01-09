@@ -14,7 +14,6 @@
 <div id=outer> 
 <table background="img/icon_bg_grad2.gif" width="1000" border="0" align="center" cellpadding="0" cellspacing="0">
   <tr>
-     <td width="22%" height="90" ><img src="img/alcatel-lucent_logo.jpg" /></td>
      <td width="78%" class="systemtitle" > <span align="center" >Vampire System </span></td>
   </tr>
 </table>
