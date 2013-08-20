@@ -3,13 +3,14 @@ if(isset($heading))
 {
     ?>
         <h2><?=$heading?></h2>
-        <br />
     <?php
 }
 ?>
-<table align="center" border="0" cellpadding="0" cellspacing="1" id="ri" class="showlist">
-<tbody>
+<table align="center" border="0" cellpadding="0" cellspacing="0" id="ri" class="display">
+	<thead>
 <tr><th></th><th>Equip</th><th>Label</th><th>USER</th><th>NAME</th><th>SN</th><th>USER</th><th>LastUpdate</th></tr>
+</thead>
+<tbody>
 <?php 
 foreach($table as $row)
 {
@@ -23,12 +24,12 @@ foreach($table as $row)
     echo "</td>";
 
     echo "<td>";
-    echo $row['parent_type'];
+    ?> <a href="?category=showparenttype&parent_type=<?=$row['parent_type']?>"><?=$row['parent_type']?></a><?php
     echo "</td>";
 
     echo "<td>";
     ?> <a href="?category=showparent&parent_sn=<?=$row['parent_sn']?>"><?=$row['parent_sn']?></a><?php
-    if($row['parent_user']==""&&$row['parent_sn']!="")
+    if($row['parent_user']==""&&$row['parent_sn']!=""&&$vampireuser!='anonymous')
     {
         ?>&nbsp;<a href="?category=ownparent&parent_id=<?=$row['parent_id']?>"> Declare</a><?php
     }
@@ -47,8 +48,8 @@ foreach($table as $row)
     echo "</td>";
 
     echo "<td>";
-    ?> <a href="?category=showmetahistory&meta_id=<?=$row['meta_id']?>"><?=$row['meta_sn']?></a> <?php
-    if($row['meta_user']==""&&$row['meta_sn']!="")
+    ?> <a href="?category=showmeta&meta_id=<?=$row['meta_id']?>"><?=$row['meta_sn']?></a> <?php
+    if($row['meta_user']==""&&$row['meta_sn']!=""&&$vampireuser!='anonymous')
     {
         ?>&nbsp;<a href="?category=ownmeta&meta_id=<?=$row['meta_id']?>"> Declare</a><?php
     }
