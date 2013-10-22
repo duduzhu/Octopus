@@ -36,12 +36,13 @@ class Welcome extends CI_Controller {
     }
     public function index()
     {
-        $ip_record = $this->db->query('select * from meta where SN = "'.$this->get_current_user().'"')->result();
+        /*$ip_record = $this->db->query('select * from meta where SN = "'.$this->get_current_user().'"')->result();
         if(count($ip_record)==1 && $ip_record[0]->USER!=$this->get_current_user())
         {
             $this->ownmeta($ip_record[0]->id);
-            return;
-        }
+        }*/
+
+        if(!$this->logged()){$this->login();return;}
 
         if(isset($_REQUEST['category']))
         {
@@ -63,17 +64,13 @@ class Welcome extends CI_Controller {
                 case 'releasemeta' : $this->releasemeta(); break;
                 case 'releaseparent' : $this->releaseparent(); break;
                 case 'ip' : $this->ip(); break;
+                case 'updatenote' : $this->updatenote(); break;
                 case 'login' : $this->login(); break;
                 case 'logout' : $this->logout(); break;
             }
         }
         else
-        {
-            if($this->logged())
-                $this->myri();
-            else
-                $this->login();
-        }
+            $this->myri();
     }
     private function upload($error=array('error' => ''))
     {
@@ -226,10 +223,12 @@ class Welcome extends CI_Controller {
         $row['parent_sn']=$parent_info[0]->SN;
         $row['parent_user']=$parent_info[0]->USER;
         $row['parent_id']=$parent_id;
+        $row['parent_note']=$parent_info[0]->NOTE;
         $row['meta_type']=$meta_info[0]->MNEMONIC;
         $row['meta_sn']=$meta_info[0]->SN;
         $row['meta_user']=$meta_info[0]->USER;
         $row['meta_id']=$meta_id;
+        $row['meta_note']=$meta_info[0]->NOTE;
         $row['timestamp'] = $linkrecord->TIMESTAMP;
         return $row;
     }
@@ -244,7 +243,27 @@ class Welcome extends CI_Controller {
     }
     public function showparent()
     {
-        $this->ri_with_filter("All equipments attached to ".$_REQUEST['parent_sn'],NULL,$_REQUEST['parent_sn'],NULL);
+        $note = $this->db->query("select * from parent where SN = '".$_REQUEST['parent_sn']."'")->result();
+        $data['note']=$note[0]->NOTE;
+        $data['databasetable']='parent';
+        $data['id']=$_REQUEST['parent_sn'];
+        $data['vampireuser']=$this->get_current_user();
+        $data['heading']="All equipments attached to ".$_REQUEST['parent_sn'];
+        $data['table']=array();
+        $link = $this->db->get("link")->result();
+        foreach ($link as $linkrecord)
+        {
+            $row=$this->row_by_record($linkrecord);
+            if($row['parent_sn'] != $_REQUEST['parent_sn'])
+            {
+                continue;
+            }
+            array_push($data['table'], $row);
+        }
+
+        $this->load->view('header', array('vampireuser' => $this->get_current_user()));
+		$this->load->view('show_record',$data);
+		$this->load->view('tail');
     }
 
     public function showparenttype()
@@ -261,10 +280,12 @@ class Welcome extends CI_Controller {
             $row['parent_sn']=$parentrecord->SN;
             $row['parent_user']=$parentrecord->USER;
             $row['parent_id']=$parentrecord->id;
+            $row['parent_note']=$parentrecord->NOTE;
             $row['meta_type']='';
             $row['meta_sn']='';
             $row['meta_user']='';
             $row['meta_id']='';
+            $row['meta_note']='';
             $row['timestamp'] = '';
             array_push($data['table'], $row);
         }
@@ -282,17 +303,30 @@ class Welcome extends CI_Controller {
         $this->ri_with_filter("Equipments of ".$_REQUEST['user'],$_REQUEST['user'],NULL,NULL);
     }
 
+    public function updatenote()
+    {
+        if($_REQUEST['databasetable'] == 'meta' )
+            $this->db->query('update meta set NOTE = \''.$_REQUEST['note'].'\' where id = '.$_REQUEST['id']);
+        else
+            $this->db->query('update parent set NOTE = \''.$_REQUEST['note'].'\' where sn = "'.$_REQUEST['id'].'"');
+        $this->myri();
+    }
     public function showmeta()
     {
         $data['vampireuser']=$this->get_current_user();
-        $data['heading']="Resource History";
         $data['table']=array();
+        $note = $this->db->query("select * from meta where id = ".$_REQUEST['meta_id'])->result();
+        $data['note']=$note[0]->NOTE;
+        $data['databasetable']='meta';
+        $data['id']=$_REQUEST['meta_id'];
+        $data['heading']="Resource History: ".$note[0]->MNEMONIC."-".$note[0]->SN;
         $history = $this->db->query("select * from history where id_meta = ".$_REQUEST['meta_id']." order by id desc")->result();
         foreach ($history as $item)
         {
             $row=$this->row_by_record($item);
             array_push($data['table'], $row);
         }
+
         $this->load->view('header', array('vampireuser' => $this->get_current_user()));
 		$this->load->view('show_record',$data);
 		$this->load->view('tail');
@@ -315,7 +349,7 @@ class Welcome extends CI_Controller {
         foreach ($link as $linkrecord)
         {
             $row=$this->row_by_record($linkrecord);
-            if($row['parent_user'] && $row['meta_user'] && $row['parent_user'] != $row['meta_user'])
+            if(($row['parent_user'] || $row['meta_user']) && $row['parent_user'] != $row['meta_user'])
             {
                 array_push($data['table'], $row);
             }

@@ -27,6 +27,7 @@
 <a href="?category=ip">IP</a>&nbsp;
 <a href="?category=mx">MX</a>&nbsp;
 <a href="?category=showparenttype&parent_type=BSC">BSC</a>&nbsp;
+<a href="?category=showparenttype&parent_type=MFS">MFS</a>&nbsp;
 <a href="?category=showparenttype&parent_type=BTS">BTS</a>&nbsp;
 <a href="?category=upload">Upload</a>&nbsp;
 <?php

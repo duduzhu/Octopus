@@ -1,7 +1,8 @@
 #!/usr/bin/perl
+package Mail;
 package DB;
-use strict;
 use DBI;
+use strict;
 
 sub dbinit
 {
@@ -10,13 +11,13 @@ sub dbinit
 
 sub update_record
 {
-    chomp(my($p_mn, $p_sn, $m_mn, $m_sn, $user, $dbh, $date, $time) = @_);
+    chomp(my($p_mn, $p_sn, $m_mn, $m_sn, $user, $note,$dbh, $date, $time) = @_);
     if(!$p_mn || !$m_mn || !$m_sn)
     {
         return;
     }
-    my ($meta_id,$meta_user) = get_or_insert($m_mn, $m_sn,$user,"meta",$dbh);
-    my ($parent_id,$parent_user) = get_or_insert($p_mn, $p_sn,$user,"parent",$dbh);
+    my ($meta_id,$meta_user) = get_or_insert($m_mn, $m_sn,$user,$note,"meta",$dbh);
+    my ($parent_id,$parent_user) = get_or_insert($p_mn, $p_sn,$user,$note,"parent",$dbh);
     update_link($meta_id, $parent_id, $date, $time, $dbh);
 }
 
@@ -36,7 +37,33 @@ sub own_meta_by_id
     if($current_user ne $user)
     {
         $dbh->do("UPDATE meta SET USER=\'$user\' where id=$m_id");
-        detect_user_misalign($m_id,$dbh);
+        detect_user_misalign($dbh,$m_id);
+    }
+}
+sub clear_isolate
+{
+    my ($dbh) = @_;
+    my $all_parents = $dbh->prepare("SELECT id FROM parent");
+    $all_parents->execute(); 
+    while(my $p_id = $all_parents->fetchrow())
+    {
+        my $test = $dbh->prepare("SELECT id_meta FROM link where id_parent=$p_id");
+        $test->execute();
+        if(0 == $test->fetchrow_array())
+        {
+            my $remove = $dbh->prepare("DELETE from parent where id=$p_id");
+            $remove->execute();
+
+            my $remove_his = $dbh->prepare("DELETE from history where id_parent=$p_id");
+            $remove_his->execute();
+        }
+    }
+
+    my $all_links = $dbh->prepare("SELECT * FROM link");
+    $all_links->execute();
+    while(my $link = $all_links->fetchrow())
+    {
+        
     }
 }
 sub own_parent_by_sn
@@ -67,17 +94,22 @@ sub get_user
 
 sub get_or_insert
 {
-    my($mn, $sn, $user,$table,$dbh) = @_;
-    my $sth = $dbh->prepare("SELECT id FROM $table where sn=\'$sn\'");
+    my($mn, $sn, $user,$note,$table,$dbh) = @_;
+    my $sth = $dbh->prepare("SELECT * FROM $table where sn=\'$sn\'");
     $sth->execute();
-
-    if(my $id = $sth->fetchrow())
+    if(my $row = $sth->fetchrow_hashref())
     {
+        my $id = $row->{id};
+        if($row->{NOTE} == "")
+        {
+             $dbh->do("UPDATE $table SET NOTE=\'$note\' where id=$id");
+        }
+            
         return ($id,get_user($id,$table,$dbh));
     }
     else
     {
-        $dbh->do("INSERT INTO $table (SN, MNEMONIC, USER) VALUES(\'$sn\',\'$mn\',\'$user\')");
+        $dbh->do("INSERT INTO $table (SN, MNEMONIC, USER, NOTE) VALUES(\'$sn\',\'$mn\',\'$user\',\'$note\')");
         $sth = $dbh->prepare("SELECT id FROM $table where SN=\'$sn\'");
         $sth->execute();
         return $sth->fetchrow();
@@ -91,7 +123,7 @@ sub detect_user_misalign
                  Subject => '[Vampire] Misalign warning on '.`date`,
                  Message => ""
                );
-    my ($meta_id, $dbh) = @_;
+    my ($dbh,$meta_id) = @_;
     my $sth;
     if($meta_id)
     {
@@ -120,10 +152,10 @@ sub detect_user_misalign
         $mail{Message} .= "$result->{MNEMONIC}-$result->{SN} of $parent_user\n";
         }
     }
-    if($mail{Message})
-    {
-#sendmail %mail;
-    }
+#if($mail{Message})
+#    {
+#        Mail->sendmail(%mail);
+#    }
 }
 sub update_link
 {
@@ -147,20 +179,24 @@ sub update_link
 
     if(my $current_parent = $sth->fetchrow())
     {
+        $sth = $dbh->prepare("SELECT TIMESTAMP FROM link where id_meta=\'$meta_id\'");
+        $sth->execute();
         $lasttimestamp=$sth->fetchrow();
-        if($parent_id ne $current_parent)
-        #Things changed
+
+        if(str2time($recordtimestamp) gt str2time($lasttimestamp))
         {
-            $sth = $dbh->prepare("SELECT TIMESTAMP FROM link where id_meta=\'$meta_id\'");
-            $sth->execute();
-            if(str2time($recordtimestamp) gt str2time($lasttimestamp))
+            if($parent_id ne $current_parent)
+            #Things changed
             {
-                $dbh->do("INSERT INTO history (id_meta, id_parent, TIMESTAMP) VALUES ($meta_id, \'$parent_id\', \'$recordtimestamp\')");
-                $dbh->do("UPDATE link SET id_parent=\'$parent_id\' where id_meta=\'$meta_id\'");
+                {
+                    $dbh->do("INSERT INTO history (id_meta, id_parent, TIMESTAMP) VALUES ($meta_id, \'$parent_id\', \'$recordtimestamp\')");
+                    $dbh->do("UPDATE link SET id_parent=\'$parent_id\' where id_meta=\'$meta_id\'");
+                }
             }
+
+            $dbh->do("UPDATE link SET TIMESTAMP=\'$recordtimestamp\' where id_meta=\'$meta_id\'");
         }
 
-        $dbh->do("UPDATE link SET TIMESTAMP=\'$recordtimestamp\' where id_meta=\'$meta_id\'");
     }
     else
     #It does not exist
@@ -168,7 +204,6 @@ sub update_link
         $dbh->do("INSERT INTO link (id_meta, id_parent, TIMESTAMP) VALUES(\'$meta_id\',\'$parent_id\',\'$recordtimestamp\')");
         $dbh->do("INSERT INTO history (id_meta, id_parent, TIMESTAMP) VALUES(\'$meta_id\',\'$parent_id\',\'$recordtimestamp\')");
     }
-    detect_user_misalign($meta_id,$dbh);
 }
 
 1;

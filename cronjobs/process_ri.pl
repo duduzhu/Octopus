@@ -1,9 +1,11 @@
 #!/usr/bin/perl
-use strict;
 use Vampire::DB;
 my $dbh=DB::dbinit();
+use strict;
 
-foreach (@ARGV)
+my($omc, @filelist)=@ARGV;
+
+foreach (@filelist)
 {
     open SOURCE, $_;
     my @filter;
@@ -35,7 +37,7 @@ foreach (@ARGV)
         }
         if(exists $ENV{$formated[2]} && $formated[0] && $formated[1] && $formated[3] )
         {
-            DB::update_record($formated[0],$formated[1],$formated[2],$formated[6].'-'.$formated[3], "", $dbh,$formated[4],$formated[5]);
+            DB::update_record($formated[0],$formated[1],$formated[2],$formated[6].'-'.$formated[3], "",$omc ,$dbh,$formated[4],$formated[5]);
         }
     }
     close SOURCE;

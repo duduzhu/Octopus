@@ -5,21 +5,38 @@ if(isset($heading))
         <h2><?=$heading?></h2>
     <?php
 }
+if(isset($note))
+{?>
+Note:<br />
+    <form action="<?php if(isset($action))echo $action; ?>">
+        <input type="text" name="note" value="<?php echo $note; ?>" />
+        <br /><input type=submit value="Update Note" />
+        <input type=hidden name="databasetable" value="<?php echo $databasetable;?>" />
+        <input type=hidden name="category" value="updatenote" />
+        <input type=hidden name="id" value="<?php echo $id;?>" />
+    </form>
+<?php
+}
+
 ?>
+<style type="text/css">
+#note{border:1px solid #cccccc; background:#9900CC;color:#fff; padding:5px; display:none; position:absolute;}
+</style>
 <table align="center" border="0" cellpadding="0" cellspacing="0" id="ri" class="display">
 	<thead>
 <tr><th></th><th>Equip</th><th>Label</th><th>USER</th><th>NAME</th><th>SN</th><th>USER</th><th>LastUpdate</th></tr>
 </thead>
 <tbody>
+
 <?php 
 foreach($table as $row)
 {
     echo "<tr ";
     if($row['parent_user']!="" && $row['meta_user']!="" && $row['meta_user']!=$row['parent_user'])
     { ?> style="color:red" <?php }
-    echo ">";
+    echo " >";
     echo "<td>";
-    if($row['parent_user']!="" && $row['meta_user']!="" && $row['meta_user']!=$row['parent_user'])
+    if(($row['parent_user']!="" || $row['meta_user']!="") && $row['meta_user']!=$row['parent_user'])
     { ?> <img src="img/alert_16.png" /> <?php }
     echo "</td>";
 
@@ -28,7 +45,7 @@ foreach($table as $row)
     echo "</td>";
 
     echo "<td>";
-    ?> <a href="?category=showparent&parent_sn=<?=$row['parent_sn']?>"><?=$row['parent_sn']?></a><?php
+    ?> <a title="<?=$row['parent_note']?>" href="?category=showparent&parent_sn=<?=$row['parent_sn']?>"><?=$row['parent_sn']?></a><?php
     if($row['parent_user']==""&&$row['parent_sn']!=""&&$vampireuser!='anonymous')
     {
         ?>&nbsp;<a href="?category=ownparent&parent_id=<?=$row['parent_id']?>"> Declare</a><?php
@@ -48,7 +65,7 @@ foreach($table as $row)
     echo "</td>";
 
     echo "<td>";
-    ?> <a href="?category=showmeta&meta_id=<?=$row['meta_id']?>"><?=$row['meta_sn']?></a> <?php
+    ?> <a title="<?=$row['meta_note']?>" href="?category=showmeta&meta_id=<?=$row['meta_id']?>"><?=$row['meta_sn']?></a> <?php
     if($row['meta_user']==""&&$row['meta_sn']!=""&&$vampireuser!='anonymous')
     {
         ?>&nbsp;<a href="?category=ownmeta&meta_id=<?=$row['meta_id']?>"> Declare</a><?php
@@ -73,3 +90,4 @@ foreach($table as $row)
 
 </tbody>
 </table>
+
