@@ -31,12 +31,16 @@ Note:<br />
 <?php 
 foreach($table as $row)
 {
+    if($row['meta_type']!="" && ($row['parent_user']!="" || $row['meta_user']!="") && $row['meta_user']!=$row['parent_user'])
+        $alert=true;
+    else
+        $alert=false;
     echo "<tr ";
-    if($row['parent_user']!="" && $row['meta_user']!="" && $row['meta_user']!=$row['parent_user'])
+    if($alert)
     { ?> style="color:red" <?php }
     echo " >";
     echo "<td>";
-    if(($row['parent_user']!="" || $row['meta_user']!="") && $row['meta_user']!=$row['parent_user'])
+    if($alert)
     { ?> <img src="img/alert_16.png" /> <?php }
     echo "</td>";
 
@@ -48,11 +52,22 @@ foreach($table as $row)
     ?> <a title="<?=$row['parent_note']?>" href="?category=showparent&parent_sn=<?=$row['parent_sn']?>"><?=$row['parent_sn']?></a><?php
     if($row['parent_user']==""&&$row['parent_sn']!=""&&$vampireuser!='anonymous')
     {
-        ?>&nbsp;<a href="?category=ownparent&parent_id=<?=$row['parent_id']?>"> Declare</a><?php
+        ?>&nbsp;<a href="?category=ownparent&parent_id=<?=$row['parent_id']?>">[Declare]</a><?php
     }
     if($row['parent_user']==$vampireuser)
     {
-        ?>&nbsp;<a href="?category=releaseparent&parent_id=<?=$row['parent_id']?>"> Release</a><?php
+        ?>
+            &nbsp;
+            <a href="?category=releaseparent&parent_id=<?=$row['parent_id']?>">[Release]</a>
+            &nbsp;
+            <script language="javascript">
+                function transferparent()
+                {
+                    window.location.href="?category=transferparent&targetuser="+prompt("Target USER CSL")+"&parent_id=<?=$row['parent_id']?>";
+                }
+            </script>
+            <a href="javascript:transferparent()">[Transfer]</a>
+        <?php
     }
     echo "</td>";
 
@@ -68,11 +83,22 @@ foreach($table as $row)
     ?> <a title="<?=$row['meta_note']?>" href="?category=showmeta&meta_id=<?=$row['meta_id']?>"><?=$row['meta_sn']?></a> <?php
     if($row['meta_user']==""&&$row['meta_sn']!=""&&$vampireuser!='anonymous')
     {
-        ?>&nbsp;<a href="?category=ownmeta&meta_id=<?=$row['meta_id']?>"> Declare</a><?php
+        ?>&nbsp;<a href="?category=ownmeta&meta_id=<?=$row['meta_id']?>">[Declare]</a><?php
     }
     if($row['meta_user']==$vampireuser)
     {
-        ?>&nbsp;<a href="?category=releasemeta&meta_id=<?=$row['meta_id']?>"> Release</a><?php
+        ?>&nbsp;<a href="?category=releasemeta&meta_id=<?=$row['meta_id']?>">[Release]</a>
+            <!--
+         &nbsp;
+            <script language="javascript">
+                function transfermeta()
+                {
+                    window.location.href="?category=transfermeta&targetuser="+prompt("Target USER CSL")+"&meta_id=<?=$row['meta_id']?>";
+                }
+            </script>
+            <a href="javascript:transfermeta()">[Transfer]</a>
+            -->
+         <?php
     }
     echo "</td>";
 

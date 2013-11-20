@@ -21,6 +21,7 @@ do
     mkdir $TEMPDIR/$host;
     scp axadmin@$host:/alcatel/var/share/AFTR/ARIE/*.csv $TEMPDIR/$host ;
     perl process_ri.pl $host $TEMPDIR/$host/*;
+    perl routing_check.pl;
 done
 
 for host in $IPDetector
@@ -29,5 +30,3 @@ do
     scp -r detect_ip.pl Vampire axadmin@$host:~/;
     ssh axadmin@$host "perl detect_ip.pl $host" |perl process.pl;
 done
-
-perl routing_check.pl;

@@ -17,6 +17,7 @@ class Welcome extends CI_Controller {
 	 * map to /index.php/welcome/<method_name>
 	 * @see http://codeigniter.com/user_guide/general/urls.html
 	 */
+
     function get_current_user()
     {
         if(isset($_SESSION['csl']))
@@ -28,6 +29,7 @@ class Welcome extends CI_Controller {
             return "anonymous";
         }
     }
+
     function __construct()
     {
         parent::__construct();
@@ -41,6 +43,9 @@ class Welcome extends CI_Controller {
         {
             $this->ownmeta($ip_record[0]->id);
         }*/
+
+        if(isset($_REQUEST['preloginuser']))
+            $this->registercsl($_REQUEST['preloginuser']);
 
         if(!$this->logged()){$this->login();return;}
 
@@ -67,6 +72,8 @@ class Welcome extends CI_Controller {
                 case 'updatenote' : $this->updatenote(); break;
                 case 'login' : $this->login(); break;
                 case 'logout' : $this->logout(); break;
+                case 'transfermeta' : $this->transfermeta(); break;
+                case 'transferparent' : $this->transferparent(); break;
             }
         }
         else
@@ -179,17 +186,17 @@ class Welcome extends CI_Controller {
     {
         return $this->db->query('select id_meta from link where id_parent = '.$id_parent)->result();
     }
-    public function releasemeta()
+    public function releasemeta($newuser="")
     {
-        $this->db->query('update meta set USER = "" where id = "'.$_REQUEST['meta_id'].'"');
+        $this->db->query('update meta set USER = "'.$newuser.'" where id = "'.$_REQUEST['meta_id'].'"');
         $this->myri();
     }
-    public function releaseparent()
+    public function releaseparent($newuser="")
     {
-        $this->db->query('update parent set USER = "" where id = "'.$_REQUEST['parent_id'].'"');
+        $this->db->query('update parent set USER = "'.$newuser.'" where id = "'.$_REQUEST['parent_id'].'"');
         foreach ($this->metas_by_parent($_REQUEST['parent_id']) as $meta_id)
         {
-            $this->db->query('update meta set USER = "" where id = '.$meta_id->id_meta.' and USER= "'.$this->get_current_user().'"');
+            $this->db->query('update meta set USER = "'.$newuser.'" where id = '.$meta_id->id_meta.' and USER= "'.$this->get_current_user().'"');
         }
         $this->myri();
     }
@@ -331,7 +338,29 @@ class Welcome extends CI_Controller {
 		$this->load->view('show_record',$data);
 		$this->load->view('tail');
     }
+    public function transferparent()
+    {
+        extract($_REQUEST);
+        $acceptlink="http://172.24.12.75/BSC_web/Vampire?category=ownparent&preloginuser=".$targetuser."&parent_id=".$parent_id;
+        $rejectlink="http://172.24.12.75/BSC_web/Vampire?category=ownparent&preloginuser=".$this->get_current_user()."&parent_id=".$parent_id;
+        $queryresult = $this->db->query("select * from parent where id = ".$parent_id)->result();
+        $name=$queryresult[0]->MNEMONIC." - ".$queryresult[0]->SN;
+        $TO=$targetuser."@sh.ad4.ad.alcatel.com";
 
+        $HEADER="MIME-Version: 1.0\nContent-type: text/html; charset=utf-8\n";
+        $HEADER.="Cc: ".$this->get_current_user()."@sh.ad4.ad.alcatel.com\n";
+        $HEADER.="From: VAMPIRE_NO_REPLY@ALCATEL-LUCENT.COM\n";
+        $SUBJECT="[Vampire]Equipment Transfering Request";
+        $CONTENT="
+            Hello\n".$this->get_current_user()." just transfered ".$name." to you. \n<a href='".$acceptlink."'>Click here</a> to accept(Force Transfer)\nor <a href='".$rejectlink."'>Click here</a> to reject(Withdraw).";
+        mail($TO, $SUBJECT, $CONTENT, $HEADER);
+
+        $this->releaseparent("TRANSFERING...");
+    }
+    public function transfermeta()
+    {
+        $this->releasemeta("TRANSFERING...");
+    }
     public function mx()
     {
         $this->ri_with_filter("MX Related Equipments",NULL,NULL,array("TMXA18","TMXA09","AGX9E","AGX18"));
@@ -359,6 +388,7 @@ class Welcome extends CI_Controller {
 		$this->load->view('show_record',$data);
 		$this->load->view('tail');
     }
+
     private function ri_with_filter($heading,$user,$parent_sn,$meta_type)
     {
         $data['vampireuser']=$this->get_current_user();
