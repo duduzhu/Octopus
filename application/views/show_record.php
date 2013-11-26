@@ -22,6 +22,18 @@ Note:<br />
 <style type="text/css">
 #note{border:1px solid #cccccc; background:#9900CC;color:#fff; padding:5px; display:none; position:absolute;}
 </style>
+
+<script language="javascript">
+    function transferparent($parent_id)
+    {
+        window.location.href="?category=transferparent&targetuser="+prompt("Target USER CSL")+"&parent_id="+$parent_id;
+    }
+    function transfermeta($meta_id)
+    {
+        window.location.href="?category=transfermeta&targetuser="+prompt("Target USER CSL")+"&meta_id="+$meta_id;
+    }
+</script>
+
 <table align="center" border="0" cellpadding="0" cellspacing="0" id="ri" class="display">
 	<thead>
 <tr><th></th><th>Equip</th><th>Label</th><th>USER</th><th>NAME</th><th>SN</th><th>USER</th><th>LastUpdate</th></tr>
@@ -49,24 +61,18 @@ foreach($table as $row)
     echo "</td>";
 
     echo "<td>";
-    ?> <a title="<?=$row['parent_note']?>" href="?category=showparent&parent_sn=<?=$row['parent_sn']?>"><?=$row['parent_sn']?></a><?php
-    if($row['parent_user']==""&&$row['parent_sn']!=""&&$vampireuser!='anonymous')
+    ?> <a title="<?=$row['parent_note']?>" href="?category=showparent&parent_id=<?=$row['parent_id']?>"><?=$row['parent_sn']?></a><?php
+    if(($row['parent_user']==""&&$row['parent_sn']!=""&&$vampireuser!='anonymous')|| 'naniw' == $vampireuser)
     {
         ?>&nbsp;<a href="?category=ownparent&parent_id=<?=$row['parent_id']?>">[Declare]</a><?php
     }
-    if($row['parent_user']==$vampireuser)
+    if($row['parent_user']==$vampireuser || 'naniw' == $vampireuser)
     {
         ?>
             &nbsp;
             <a href="?category=releaseparent&parent_id=<?=$row['parent_id']?>">[Release]</a>
             &nbsp;
-            <script language="javascript">
-                function transferparent()
-                {
-                    window.location.href="?category=transferparent&targetuser="+prompt("Target USER CSL")+"&parent_id=<?=$row['parent_id']?>";
-                }
-            </script>
-            <a href="javascript:transferparent()">[Transfer]</a>
+            <a href="javascript:transferparent(<?php echo $row['parent_id']; ?>)">[Transfer]</a>
         <?php
     }
     echo "</td>";
@@ -81,23 +87,15 @@ foreach($table as $row)
 
     echo "<td>";
     ?> <a title="<?=$row['meta_note']?>" href="?category=showmeta&meta_id=<?=$row['meta_id']?>"><?=$row['meta_sn']?></a> <?php
-    if($row['meta_user']==""&&$row['meta_sn']!=""&&$vampireuser!='anonymous')
+    if(($row['meta_user']==""&&$row['meta_sn']!=""&&$vampireuser!='anonymous')|| 'naniw' == $vampireuser)
     {
         ?>&nbsp;<a href="?category=ownmeta&meta_id=<?=$row['meta_id']?>">[Declare]</a><?php
     }
-    if($row['meta_user']==$vampireuser)
+    if($row['meta_user']==$vampireuser  || 'naniw' == $vampireuser)
     {
         ?>&nbsp;<a href="?category=releasemeta&meta_id=<?=$row['meta_id']?>">[Release]</a>
-            <!--
          &nbsp;
-            <script language="javascript">
-                function transfermeta()
-                {
-                    window.location.href="?category=transfermeta&targetuser="+prompt("Target USER CSL")+"&meta_id=<?=$row['meta_id']?>";
-                }
-            </script>
-            <a href="javascript:transfermeta()">[Transfer]</a>
-            -->
+            <a href="javascript:transfermeta(<? echo $row['meta_id']; ?>)">[Transfer]</a>
          <?php
     }
     echo "</td>";

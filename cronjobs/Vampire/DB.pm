@@ -100,11 +100,9 @@ sub get_or_insert
     if(my $row = $sth->fetchrow_hashref())
     {
         my $id = $row->{id};
-        if($row->{NOTE} == "")
-        {
-             $dbh->do("UPDATE $table SET NOTE=\'$note\' where id=$id");
-        }
-            
+#$note = $row->{NOTE}.'\n'.`date`.': '.$note;
+        if(!$row->{NOTE})
+            $dbh->do("UPDATE $table SET NOTE=\'$note\' where id=$id");
         return ($id,get_user($id,$table,$dbh));
     }
     else

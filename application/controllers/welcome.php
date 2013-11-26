@@ -38,20 +38,21 @@ class Welcome extends CI_Controller {
     }
     public function index()
     {
+        extract($_REQUEST);
         /*$ip_record = $this->db->query('select * from meta where SN = "'.$this->get_current_user().'"')->result();
         if(count($ip_record)==1 && $ip_record[0]->USER!=$this->get_current_user())
         {
             $this->ownmeta($ip_record[0]->id);
         }*/
 
-        if(isset($_REQUEST['preloginuser']))
-            $this->registercsl($_REQUEST['preloginuser']);
+        if(isset($preloginuser))
+            $this->registercsl($preloginuser);
 
         if(!$this->logged()){$this->login();return;}
 
-        if(isset($_REQUEST['category']))
+        if(isset($category))
         {
-            switch($_REQUEST['category'])
+            switch($category)
             {
                 case 'myri' : $this->myri(); break;
                 case 'mx' : $this->mx(); break;
@@ -81,12 +82,14 @@ class Welcome extends CI_Controller {
     }
     private function upload($error=array('error' => ''))
     {
+        extract($_REQUEST);
         $this->load->view('header', array('vampireuser' => $this->get_current_user()));
         $this->load->view('upload_csv', $error);
         $this->load->view('tail');
     }
     private function logout()
     {
+        extract($_REQUEST);
         $_SESSION['csl']='anonymous';
         session_destroy();
         $this->login();
@@ -102,12 +105,13 @@ class Welcome extends CI_Controller {
     }
     private function login()
     {
+        extract($_REQUEST);
         $login_success=false;
 
-        if(isset($_REQUEST['csl']))
+        if(isset($csl))
         {
-            $user=trim($_REQUEST['csl']);
-            $password=trim($_REQUEST['password']);
+            $user=trim($csl);
+            $password=trim($password);
         }
         else
         {
@@ -159,6 +163,7 @@ class Welcome extends CI_Controller {
     }
     private function do_upload()
     {
+        extract($_REQUEST);
         $config['upload_path']='./uploads/';
         $config['allowed_types']='*';
         $config['max_size']='10240';
@@ -177,6 +182,7 @@ class Welcome extends CI_Controller {
     }
     private function success_upload($message="")
     {
+        extract($_REQUEST);
         $this->load->view('header', array('vampireuser' => $this->get_current_user()));
         echo "Upload Successfully.<br/>";
         echo $message;
@@ -184,43 +190,49 @@ class Welcome extends CI_Controller {
     }
     private function metas_by_parent($id_parent)
     {
+        extract($_REQUEST);
         return $this->db->query('select id_meta from link where id_parent = '.$id_parent)->result();
     }
     public function releasemeta($newuser="")
     {
-        $this->db->query('update meta set USER = "'.$newuser.'" where id = "'.$_REQUEST['meta_id'].'"');
-        $this->myri();
+        extract($_REQUEST);
+        $this->db->query('update meta set USER = "'.$newuser.'" where id = "'.$meta_id.'"');
+        $this->showmeta();
     }
     public function releaseparent($newuser="")
     {
-        $this->db->query('update parent set USER = "'.$newuser.'" where id = "'.$_REQUEST['parent_id'].'"');
-        foreach ($this->metas_by_parent($_REQUEST['parent_id']) as $meta_id)
+        extract($_REQUEST);
+        $this->db->query('update parent set USER = "'.$newuser.'" where id = "'.$parent_id.'"');
+        foreach ($this->metas_by_parent($parent_id) as $meta_id)
         {
             $this->db->query('update meta set USER = "'.$newuser.'" where id = '.$meta_id->id_meta.' and USER= "'.$this->get_current_user().'"');
         }
-        $this->myri();
+        $this->showparent();
     }
     public function ownmeta($metaid="")
     {
+        extract($_REQUEST);
         if($metaid=="")
         {
-            $metaid=$_REQUEST['meta_id'];
+            $metaid=$meta_id;
         }
         $this->db->query('update meta set USER = "'.$this->get_current_user().'" where id = "'.$metaid.'"');
-        $this->myri();
+        $this->showmeta();
     }
     public function ownparent()
     {
-        $this->db->query('update parent set USER = "'.$this->get_current_user().'" where id = "'.$_REQUEST['parent_id'].'"');
-        foreach ($this->metas_by_parent($_REQUEST['parent_id']) as $meta_id)
+        extract($_REQUEST);
+        $this->db->query('update parent set USER = "'.$this->get_current_user().'" where id = "'.$parent_id.'"');
+        foreach ($this->metas_by_parent($parent_id) as $meta_id)
         {
-            $this->db->query('update meta set USER = "'.$this->get_current_user().'" where id = "'.$meta_id->id_meta.'" and USER = "" ');
+            $this->db->query('update meta set USER = "'.$this->get_current_user().'" where id = "'.$meta_id->id_meta.'" and (USER = "" or USER = "TRANSFERING...") ');
         }
-        $this->myri();
+        $this->showparent();
     }
 
     private function row_by_record($linkrecord)
     {
+        extract($_REQUEST);
         $meta_id = $linkrecord->id_meta;
         $parent_id = $linkrecord->id_parent;
         $parent_info = $this->db->query('select * from parent where id = '. $parent_id)->result();
@@ -242,26 +254,29 @@ class Welcome extends CI_Controller {
 
 	public function allri()
 	{
+        extract($_REQUEST);
         $this->ri_with_filter("All equipments",NULL,NULL,NULL);
 	}
     public function showmetatype()
     {
-        $this->ri_with_filter("All ".$_REQUEST['meta_type']."s ",NULL,NULL,array($_REQUEST['meta_type']));
+        extract($_REQUEST);
+        $this->ri_with_filter("All ".$meta_type."s ",NULL,NULL,array($meta_type));
     }
     public function showparent()
     {
-        $note = $this->db->query("select * from parent where SN = '".$_REQUEST['parent_sn']."'")->result();
+        extract($_REQUEST);
+        $note = $this->db->query("select * from parent where id = '".$parent_id."'")->result();
         $data['note']=$note[0]->NOTE;
         $data['databasetable']='parent';
-        $data['id']=$_REQUEST['parent_sn'];
+        $data['id']=$note[0]->SN;
         $data['vampireuser']=$this->get_current_user();
-        $data['heading']="All equipments attached to ".$_REQUEST['parent_sn'];
+        $data['heading']="All equipments attached to ".$note[0]->SN;
         $data['table']=array();
         $link = $this->db->get("link")->result();
         foreach ($link as $linkrecord)
         {
             $row=$this->row_by_record($linkrecord);
-            if($row['parent_sn'] != $_REQUEST['parent_sn'])
+            if($row['parent_id'] != $parent_id)
             {
                 continue;
             }
@@ -275,13 +290,14 @@ class Welcome extends CI_Controller {
 
     public function showparenttype()
     {
+        extract($_REQUEST);
         $data['vampireuser']=$this->get_current_user();
-        $data['heading']="All ".$_REQUEST['parent_type'];
+        $data['heading']="All ".$parent_type;
         $data['table']=array();
         $parent = $this->db->get("parent")->result();
         foreach ($parent as $parentrecord)
         {
-            if($parentrecord->MNEMONIC != $_REQUEST['parent_type'])
+            if($parentrecord->MNEMONIC != $parent_type)
                 continue;
             $row['parent_type']=$parentrecord->MNEMONIC;
             $row['parent_sn']=$parentrecord->SN;
@@ -307,27 +323,29 @@ class Welcome extends CI_Controller {
     }
     public function ri_by_user()
     {
-        $this->ri_with_filter("Equipments of ".$_REQUEST['user'],$_REQUEST['user'],NULL,NULL);
+        $this->ri_with_filter("Equipments of ".$user,$user,NULL,NULL);
     }
 
     public function updatenote()
     {
-        if($_REQUEST['databasetable'] == 'meta' )
-            $this->db->query('update meta set NOTE = \''.$_REQUEST['note'].'\' where id = '.$_REQUEST['id']);
+        extract($_REQUEST);
+        if($databasetable == 'meta' )
+            $this->db->query('update meta set NOTE = \''.$note.'\' where id = '.$id);
         else
-            $this->db->query('update parent set NOTE = \''.$_REQUEST['note'].'\' where sn = "'.$_REQUEST['id'].'"');
+            $this->db->query('update parent set NOTE = \''.$note.'\' where sn = "'.$id.'"');
         $this->myri();
     }
     public function showmeta()
     {
+        extract($_REQUEST);
         $data['vampireuser']=$this->get_current_user();
         $data['table']=array();
-        $note = $this->db->query("select * from meta where id = ".$_REQUEST['meta_id'])->result();
+        $note = $this->db->query("select * from meta where id = ".$meta_id)->result();
         $data['note']=$note[0]->NOTE;
         $data['databasetable']='meta';
-        $data['id']=$_REQUEST['meta_id'];
+        $data['id']=$meta_id;
         $data['heading']="Resource History: ".$note[0]->MNEMONIC."-".$note[0]->SN;
-        $history = $this->db->query("select * from history where id_meta = ".$_REQUEST['meta_id']." order by id desc")->result();
+        $history = $this->db->query("select * from history where id_meta = ".$meta_id." order by id desc")->result();
         foreach ($history as $item)
         {
             $row=$this->row_by_record($item);
@@ -349,7 +367,7 @@ class Welcome extends CI_Controller {
 
         $HEADER="MIME-Version: 1.0\nContent-type: text/html; charset=utf-8\n";
         $HEADER.="Cc: ".$this->get_current_user()."@sh.ad4.ad.alcatel.com\n";
-        $HEADER.="From: VAMPIRE_NO_REPLY@ALCATEL-LUCENT.COM\n";
+        $HEADER.="From: VAMPIRE_NO_REPLY\n";
         $SUBJECT="[Vampire]Equipment Transfering Request";
         $CONTENT="
             Hello\n".$this->get_current_user()." just transfered ".$name." to you. \n<a href='".$acceptlink."'>Click here</a> to accept(Force Transfer)\nor <a href='".$rejectlink."'>Click here</a> to reject(Withdraw).";
@@ -391,6 +409,7 @@ class Welcome extends CI_Controller {
 
     private function ri_with_filter($heading,$user,$parent_sn,$meta_type)
     {
+        extract($_REQUEST);
         $data['vampireuser']=$this->get_current_user();
         $data['heading']=$heading;
         $data['table']=array();
