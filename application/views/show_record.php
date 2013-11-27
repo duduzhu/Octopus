@@ -24,13 +24,24 @@ Note:<br />
 </style>
 
 <script language="javascript">
+    function askid()
+    {
+        return prompt("Target USER CSL");
+    }
     function transferparent($parent_id)
     {
-        window.location.href="?category=transferparent&targetuser="+prompt("Target USER CSL")+"&parent_id="+$parent_id;
+        $id=askid();
+        if($id == null)
+            return;
+
+        window.location.href="?category=transferparent&targetuser="+$id+"&parent_id="+$parent_id;
     }
     function transfermeta($meta_id)
     {
-        window.location.href="?category=transfermeta&targetuser="+prompt("Target USER CSL")+"&meta_id="+$meta_id;
+        $id=askid();
+        if($id == null)
+            return;
+        window.location.href="?category=transfermeta&targetuser="+$id+"&meta_id="+$meta_id;
     }
 </script>
 

@@ -377,6 +377,20 @@ class Welcome extends CI_Controller {
     }
     public function transfermeta()
     {
+        extract($_REQUEST);
+        $acceptlink="http://172.24.12.75/BSC_web/Vampire?category=ownmeta&preloginuser=".$targetuser."&meta_id=".$meta_id;
+        $rejectlink="http://172.24.12.75/BSC_web/Vampire?category=ownmeta&preloginuser=".$this->get_current_user()."&meta_id=".$meta_id;
+        $queryresult = $this->db->query("select * from meta where id = ".$meta_id)->result();
+        $name=$queryresult[0]->MNEMONIC." - ".$queryresult[0]->SN;
+        $TO=$targetuser."@sh.ad4.ad.alcatel.com";
+
+        $HEADER="MIME-Version: 1.0\nContent-type: text/html; charset=utf-8\n";
+        $HEADER.="Cc: ".$this->get_current_user()."@sh.ad4.ad.alcatel.com\n";
+        $HEADER.="From: VAMPIRE_NO_REPLY\n";
+        $SUBJECT="[Vampire]Equipment Transfering Request";
+        $CONTENT="
+            Hello\n".$this->get_current_user()." just transfered ".$name." to you. \n<a href='".$acceptlink."'>Click here</a> to accept(Force Transfer)\nor <a href='".$rejectlink."'>Click here</a> to reject(Withdraw).";
+        mail($TO, $SUBJECT, $CONTENT, $HEADER);
         $this->releasemeta("TRANSFERING...");
     }
     public function mx()
