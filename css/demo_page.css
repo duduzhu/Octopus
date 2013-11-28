@@ -12,8 +12,8 @@
 
 
 #dt_example #container {
-	width: 800px;
-	margin: 30px auto;
+	width: 92%px;
+	margin: 10px auto;
 	padding: 0;
 }
 
@@ -71,14 +71,8 @@
 	clear: both;
 }
 
-#dt_example a {
-	color: #0063DC;
-	text-decoration: none;
-}
-
-#dt_example a:hover {
-	text-decoration: underline;
-}
+#dt_example a, a:link ,a:visited { text-decoration: underline;}
+#dt_example a:hover { text-decoration: none; }
 
 #dt_example ul {
 	color: #4E6CA3;

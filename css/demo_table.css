@@ -102,7 +102,7 @@
 	padding-right: 23px;
 	margin-left: 10px;
 }
-
+/*
 .paginate_disabled_previous {
 	background: url('../images/back_disabled.png') no-repeat top left;
 }
@@ -124,7 +124,7 @@
 .paginate_enabled_next:hover {
 	background: url('../images/forward_enabled_hover.png') no-repeat top right;
 }
-
+*/
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -134,7 +134,7 @@ table.display {
 	margin: 0 auto;
 	clear: both;
 	width: 100%;
-	
+	font-size: 100%;
 	/* Note Firefox 3.5 and before have a bug with border-collapse
 	 * ( https://bugzilla.mozilla.org/show%5Fbug.cgi?id=155955 ) 
 	 * border-spacing: 0; is one possible option. Conditional-css.com is
@@ -180,7 +180,7 @@ table.display td.center {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * DataTables sorting
  */
-
+/*
 .sorting_asc {
 	background: url('../images/sort_asc.png') no-repeat center right;
 }
@@ -200,7 +200,7 @@ table.display td.center {
 .sorting_desc_disabled {
 	background: url('../images/sort_desc_disabled.png') no-repeat center right;
 }
- 
+*/ 
 table.display thead th:active,
 table.display thead td:active {
 	outline: none;

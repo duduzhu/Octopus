@@ -1,6 +1,6 @@
 #!/bin/bash
 #export REPORT_MAIL=naniw@sh.ad4.ad.alcatel.com;
-export REPORT_MAIL=nan.i.wang@alcatel-sbell.com.cn;
+#export REPORT_MAIL=nan.i.wang@alcatel-sbell.com.cn;
 export OMCRList="172.24.179.31 172.24.179.128 172.24.179.183 172.24.179.209 172.24.179.134 172.24.179.135 172.24.179.136 172.24.179.172 172.24.179.142 172.24.178.194 172.24.178.147 172.24.178.148 172.24.178.149 172.24.178.132 172.24.178.137 172.24.178.176 172.24.178.164 172.24.178.28";
 #export OMCRList="172.24.179.142";
 export JBXOMCP=YES;
@@ -32,6 +32,6 @@ export AGX18=YES;
 export NMXA09=YES;
 export NMXA18=YES;
 
-#export IPDetector="172.24.178.137 172.24.179.142";
+export IPDetector="172.24.178.137 172.24.179.142";
 #export IPDetector="172.24.178.137";
-export IPDetector="$OMCRList";
+#export IPDetector="$OMCRList";

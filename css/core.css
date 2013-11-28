@@ -21,7 +21,7 @@ h3 { margin: 5px 0; }
 }
 button, select, input, textarea {
 
-	width: 300px;
+/*	width: 300px;*/
 }
 
 table {
@@ -89,7 +89,7 @@ div.profileframe{
 	/*border: thin solid #000000;*/
 }
 div#outer { 
-    width: 65%; 
+    width: 100%; 
     background-color:#FFFFFF; 
     margin-top: 50px; 
     margin-bottom: 50px; 

@@ -37,6 +37,14 @@ foreach (@filelist)
         }
         if(exists $ENV{$formated[2]} && $formated[0] && $formated[1] && $formated[3] )
         {
+        if($formated[0] =~ /BTS/)
+	    {
+            my @BTSID = split /\//,  $formated[1];
+            chomp(@BTSID);
+            $BTSID[0] =~ s/^\s*BSC\s*//;
+            $BTSID[1] =~ s/^\s*BTS\s*//;
+            $formated[1] = $BTSID[1]."\/".$BTSID[0];
+	    }
             DB::update_record($formated[0],$formated[1],$formated[2],$formated[6].'-'.$formated[3], "",$omc ,$dbh,$formated[4],$formated[5]);
         }
     }
