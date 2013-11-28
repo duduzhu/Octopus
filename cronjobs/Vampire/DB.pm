@@ -11,13 +11,13 @@ sub dbinit
 
 sub update_record
 {
-    chomp(my($p_mn, $p_sn, $m_mn, $m_sn, $user, $note,$dbh, $date, $time) = @_);
+    chomp(my($p_mn, $p_sn, $m_mn, $m_sn, $user, $source,$dbh, $date, $time) = @_);
     if(!$p_mn || !$m_mn || !$m_sn)
     {
         return;
     }
-    my ($meta_id,$meta_user) = get_or_insert($m_mn, $m_sn,$user,$note,"meta",$dbh);
-    my ($parent_id,$parent_user) = get_or_insert($p_mn, $p_sn,$user,$note,"parent",$dbh);
+    my ($meta_id,$meta_user) = get_or_insert($m_mn, $m_sn,$user,$source,"meta",$dbh);
+    my ($parent_id,$parent_user) = get_or_insert($p_mn, $p_sn,$user,$source,"parent",$dbh);
     update_link($meta_id, $parent_id, $date, $time, $dbh);
 }
 
@@ -94,20 +94,20 @@ sub get_user
 
 sub get_or_insert
 {
-    my($mn, $sn, $user,$note,$table,$dbh) = @_;
+    my($mn, $sn, $user,$source,$table,$dbh) = @_;
     my $sth = $dbh->prepare("SELECT * FROM $table where sn=\'$sn\'");
     $sth->execute();
     if(my $row = $sth->fetchrow_hashref())
     {
         my $id = $row->{id};
-#$note = $row->{NOTE}.'\n'.`date`.': '.$note;
-        if(!$row->{NOTE})
-            $dbh->do("UPDATE $table SET NOTE=\'$note\' where id=$id");
+#$source = $row->{SOURCE}.'\n'.`date`.': '.$source;
+        if(!$row->{SOURCE})
+            $dbh->do("UPDATE $table SET SOURCE=\'$source\' where id=$id");
         return ($id,get_user($id,$table,$dbh));
     }
     else
     {
-        $dbh->do("INSERT INTO $table (SN, MNEMONIC, USER, NOTE) VALUES(\'$sn\',\'$mn\',\'$user\',\'$note\')");
+        $dbh->do("INSERT INTO $table (SN, MNEMONIC, USER, SOURCE) VALUES(\'$sn\',\'$mn\',\'$user\',\'$source\')");
         $sth = $dbh->prepare("SELECT id FROM $table where SN=\'$sn\'");
         $sth->execute();
         return $sth->fetchrow();

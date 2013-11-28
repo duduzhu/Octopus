@@ -249,6 +249,7 @@ class Welcome extends CI_Controller {
         $row['meta_id']=$meta_id;
         $row['meta_note']=$meta_info[0]->NOTE;
         $row['timestamp'] = $linkrecord->TIMESTAMP;
+        $row['source'] = $meta_info[0]->SOURCE;
         return $row;
     }
 
@@ -310,6 +311,7 @@ class Welcome extends CI_Controller {
             $row['meta_id']='';
             $row['meta_note']='';
             $row['timestamp'] = '';
+            $row['source'] = $parentrecord->SOURCE;
             array_push($data['table'], $row);
         }
 

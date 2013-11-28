@@ -47,7 +47,7 @@ Note:<br />
 
 <table align="center" border="0" cellpadding="0" cellspacing="0" id="ri" class="display">
 	<thead>
-<tr><th></th><th>Equip</th><th>Label</th><th>USER</th><th>NAME</th><th>SN</th><th>USER</th><th>LastUpdate</th></tr>
+<tr><th><img src="img/alert_16.png" /></th><th>Equip</th><th>Label</th><th>USER</th><th>NAME</th><th>SN</th><th>USER</th><th>Source</th><th>LastUpdate</th></tr>
 </thead>
 <tbody>
 
@@ -113,6 +113,10 @@ foreach($table as $row)
 
     echo "<td>";
     ?> <a href="mailto:<?=$row['meta_user']?>@sh.ad4.ad.alcatel.com"><?=$row['meta_user']?></a> <?php
+    echo "</td>";
+
+    echo "<td>";
+    echo $row['source'];
     echo "</td>";
 
     echo "<td>";
