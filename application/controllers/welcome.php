@@ -261,7 +261,9 @@ class Welcome extends CI_Controller {
     public function showmetatype()
     {
         extract($_REQUEST);
-        $this->ri_with_filter("All ".$meta_type."s ",NULL,NULL,array($meta_type));
+        $types=array();
+        array_push($types,$meta_type);
+        $this->ri_with_filter("All ".$meta_type."s ",NULL,NULL,$types);
     }
     public function showparent()
     {
@@ -423,7 +425,7 @@ class Welcome extends CI_Controller {
 		$this->load->view('tail');
     }
 
-    private function ri_with_filter($heading,$user,$parent_sn,$meta_type)
+    private function ri_with_filter($heading,$user,$parent_sn,$meta_type=array())
     {
         extract($_REQUEST);
         $data['vampireuser']=$this->get_current_user();
@@ -437,7 +439,7 @@ class Welcome extends CI_Controller {
             {
                 continue;
             }
-            if(!is_null($meta_type) && !in_array($row['meta_type'] , $meta_type))
+            if(!is_null($meta_type) && !in_array($row['meta_type'], (array)$meta_type))
             {
                 continue;
             }

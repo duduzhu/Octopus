@@ -70,8 +70,6 @@ foreach($table as $row)
     else
         $alert=false;
     echo "<tr ";
-    if($alert)
-    { ?> style="color:red" <?php }
     echo " >";
     echo "<td>";
     if($alert)
@@ -121,7 +119,7 @@ foreach($table as $row)
     echo "</td>";
 
     echo "<td>";
-    echo $row['source'];
+    echo preg_replace('/XXX/', '<img src="img/offline_16.png" />', $row['source']);
     echo "</td>";
 
     echo "<td>";

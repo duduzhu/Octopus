@@ -1,6 +1,22 @@
 #!/bin/bash
 . config.sh
 TEMPDIR=/tmp/VAMPIRE;
+
+if [ `uname` == "Linux" ]
+then
+    function PING()
+    {
+        ping -c 1 -w 1 $1;
+        return $?
+    }
+else
+    function PING()
+    {
+	ping $1 1;
+        return $?
+    }
+fi
+
 [ -d $TEMPDIR ] || mkdir $TEMPDIR
 rm -rf $TEMPDIR/*
 
@@ -16,11 +32,18 @@ rm -rf $TEMPDIR/*;
 
 for host in $OMCRList
 do
-    flush_RI $host >>/dev/null;
-    expect putKey -i $host -u axadmin -p omc3;
-    mkdir $TEMPDIR/$host;
-    scp axadmin@$host:/alcatel/var/share/AFTR/ARIE/*.csv $TEMPDIR/$host ;
-    perl process_ri.pl $host $TEMPDIR/$host/*;
+    PING $host
+    if [ $? == 0 ]
+    then
+        flush_RI $host >>/dev/null;
+        expect putKey -i $host -u axadmin -p omc3;
+        mkdir $TEMPDIR/$host;
+        scp axadmin@$host:/alcatel/var/share/AFTR/ARIE/*.csv $TEMPDIR/$host
+        perl process_ri.pl $host $TEMPDIR/$host/*
+    else
+        perl unreachable.pl $host;
+    fi
+
 done
 
 for host in $IPDetector
