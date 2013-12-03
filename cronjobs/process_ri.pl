@@ -45,7 +45,15 @@ foreach (@filelist)
             $BTSID[1] =~ s/^\s*BTS\s*//;
             $formated[1] = $BTSID[1]."\/".$BTSID[0];
 	    }
-            DB::update_record($formated[0],$formated[1],$formated[2],$formated[6].'-'.$formated[3], "",$omc ,$dbh,$formated[4],$formated[5]);
+	    my $user="";
+	    $formated[1] =~ /^[^_]*_[^_]*_([^_]*)$/;
+	    if($user)
+	    {
+    	    	$user = `curl http://172.24.12.75/BSC_web/Vampire/?touchUser=$1`;
+	    	chomp($user);
+	    	$user =~ s/<.*>//;
+	    }
+            DB::update_record($formated[0],$formated[1],$formated[2],$formated[6].'-'.$formated[3],$user,$omc ,$dbh,$formated[4],$formated[5]);
         }
     }
     close SOURCE;

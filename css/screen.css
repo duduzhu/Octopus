@@ -32,3 +32,6 @@ div#footer {
     margin: 0px; 
     border-top: thin solid #000000; 
 }
+a, a:link ,a:visited { text-decoration: none;}
+a:hover { text-decoration: none; }
+

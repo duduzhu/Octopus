@@ -4,10 +4,10 @@ function addButton($text,$note,$parameters)
 {
 	$urlparts = explode('?', $_SERVER['REQUEST_URI'],2);
 	?>
-	<a title="<?php echo $note; ?>"href="http://<?php
-		echo $_SERVER['HTTP_HOST'].$urlparts[0];
+	<a title="<?php echo $note; ?>"href="<?php
+		#echo $_SERVER['HTTP_HOST'].$urlparts[0];
 		echo $parameters;
-	?>" ><button><?php echo $text; ?></button></a>
+	?>" ><img src="img/<?php echo $text; ?>_16.png" /></a>
 	<?php
 }
 if(isset($heading))
@@ -58,7 +58,7 @@ Note:<br />
 
 <table align="center" border="0" cellpadding="0" cellspacing="0" id="ri" class="display">
 	<thead>
-<tr><th width="1" ><img src="img/alert_16.png" /></th><th width="1" title="PlatformType">P</th><th title="PlatformName">N</th><th width="1" title="USER">U</th><th width="1" title="Equipment">E</th><th title="SerialNumber">S</th><th width="31" title="User">U</th><th title="Source">S</th><th title="LastUpdate">L</th></tr>
+<tr><th width="1" ><img src="img/alert_16.png" /></th><th width="1" title="PlatformType">Type</th><th title="PlatformName">Name</th><th width="1" title="USER">User</th><th width="1" title="Equipment">Equip</th><th title="SerialNumber">Serial</th><th width="31" title="User">User</th><th title="Source">Source</th><th title="LastUpdate">LastUpdate</th></tr>
 </thead>
 <tbody>
 
@@ -81,16 +81,16 @@ foreach($table as $row)
     echo "</td>";
 
     echo "<td>";
-    ?> <a title="<?=$row['parent_note']?>" href="?category=showparent&parent_id=<?=$row['parent_id']?>"><?=$row['parent_sn']?></a><?php
     if(($row['parent_user']==""&&$row['parent_sn']!=""&&$vampireuser!='anonymous')|| 'naniw' == $vampireuser)
     {
-        addButton('D','Declare','?category=ownparent&parent_id='.$row['parent_id']);
+        addButton('declare','Declare','?category=ownparent&parent_id='.$row['parent_id']);
     }
     if($row['parent_user']==$vampireuser || 'naniw' == $vampireuser)
     {
-        addButton('R','Release','?category=releaseparent&parent_id='.$row['parent_id']);
-        addButton('T','Transfer','javascript:transferparent('.$row['parent_id'].')');
+        addButton('release','Release','?category=releaseparent&parent_id='.$row['parent_id']);
+        addButton('transfer','Transfer','javascript:transferparent('.$row['parent_id'].')');
     }
+    ?> <a title="<?=$row['parent_note']?>" href="?category=showparent&parent_id=<?=$row['parent_id']?>"><?=$row['parent_sn']?></a><?php
     echo "</td>";
 
     echo "<td>";
@@ -102,16 +102,16 @@ foreach($table as $row)
     echo "</td>";
 
     echo "<td>";
-    ?> <a title="<?=$row['meta_note']?>" href="?category=showmeta&meta_id=<?=$row['meta_id']?>"><?=$row['meta_sn']?></a><?php
     if(($row['meta_user']==""&&$row['meta_sn']!=""&&$vampireuser!='anonymous')|| 'naniw' == $vampireuser)
     {
-	addButton('D','Declare','?category=ownmeta&meta_id='.$row['meta_id']);
+	addButton('declare','Declare','?category=ownmeta&meta_id='.$row['meta_id']);
     }
     if($row['meta_user']==$vampireuser  || 'naniw' == $vampireuser)
     {
-	addButton('R','Release','?category=releasemeta&meta_id='.$row['meta_id']);
-	addButton('T','Transfer','javascript:transfermeta('.$row['meta_id'].')');
+	addButton('release','Release','?category=releasemeta&meta_id='.$row['meta_id']);
+	addButton('transfer','Transfer','javascript:transfermeta('.$row['meta_id'].')');
     }
+    ?> <a title="<?php echo preg_replace('/^.*\-/','',$row['meta_sn']);?>" href="?category=showmeta&meta_id=<?=$row['meta_id']?>"><?php echo preg_replace('/\-.*$/','',$row['meta_sn']); ?></a><?php
     echo "</td>";
 
     echo "<td>";

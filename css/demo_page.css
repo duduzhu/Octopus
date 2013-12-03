@@ -71,7 +71,7 @@
 	clear: both;
 }
 
-#dt_example a, a:link ,a:visited { text-decoration: underline;}
+#dt_example a, a:link ,a:visited { text-decoration: none;}
 #dt_example a:hover { text-decoration: none; }
 
 #dt_example ul {

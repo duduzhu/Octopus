@@ -101,6 +101,7 @@ sub get_or_insert
     {
         my $id = $row->{id};
 #if(!$row->{SOURCE})
+        $dbh->do("UPDATE $table SET USER=\'$user\' where id=$id");
         $dbh->do("UPDATE $table SET SOURCE=\'$source\' where id=$id");
         return ($id,get_user($id,$table,$dbh));
     }

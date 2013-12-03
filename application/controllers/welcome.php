@@ -45,6 +45,10 @@ class Welcome extends CI_Controller {
             $this->ownmeta($ip_record[0]->id);
         }*/
 
+        if(isset($touchUser))
+	{
+	    $this->touchUser($touchUser); return;
+	}
         if(isset($preloginuser))
             $this->registercsl($preloginuser);
 
@@ -102,6 +106,17 @@ class Welcome extends CI_Controller {
     private function logged()
     {
         return isset($_SESSION['csl']);
+    }
+    public function touchUser($touchUser)
+    {
+	$user=trim($touchUser);	
+        $ds = ldap_connect('ldapca.na.alcatel.com');
+        @ldap_bind($ds);
+        $search = ldap_search($ds, "o=Alcatel", "uid=".$user);
+        if( ldap_count_entries($ds,$search) == 1 )
+	{
+	    echo $user;
+	}
     }
     private function login()
     {
