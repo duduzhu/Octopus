@@ -100,8 +100,11 @@ sub get_or_insert
     if(my $row = $sth->fetchrow_hashref())
     {
         my $id = $row->{id};
-#if(!$row->{SOURCE})
-        $dbh->do("UPDATE $table SET USER=\'$user\' where id=$id");
+        if(!$row->{USER})
+        {
+            #print ("UPDATE $table SET USER=\'$user\' where id=$id\n");
+            $dbh->do("UPDATE $table SET USER=\'$user\' where id=$id");
+        }
         $dbh->do("UPDATE $table SET SOURCE=\'$source\' where id=$id");
         return ($id,get_user($id,$table,$dbh));
     }

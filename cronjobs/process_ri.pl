@@ -1,8 +1,9 @@
 #!/usr/bin/perl
 use Vampire::DB;
-my $dbh=DB::dbinit();
 use strict;
 
+my $dbh=DB::dbinit();
+my %users;
 my($omc, @filelist)=@ARGV;
 
 foreach (@filelist)
@@ -33,26 +34,32 @@ foreach (@filelist)
         {
             my $clean = $splited[$_];
             $clean =~ s/(^\W+|\W+$)//g;
+            chomp($clean);
             @formated=(@formated,$clean);
         }
+        print "$formated[1]\n";
         if(exists $ENV{$formated[2]} && $formated[0] && $formated[1] && $formated[3] )
         {
-        if($formated[0] =~ /BTS/)
-	    {
-            my @BTSID = split /\//,  $formated[1];
-            chomp(@BTSID);
-            $BTSID[0] =~ s/^\s*BSC\s*//;
-            $BTSID[1] =~ s/^\s*BTS\s*//;
-            $formated[1] = $BTSID[1]."\/".$BTSID[0];
-	    }
-	    my $user="";
-	    $formated[1] =~ /^[^_]*_[^_]*_([^_]*)$/;
-	    if($user)
-	    {
-    	    	$user = `curl http://172.24.12.75/BSC_web/Vampire/?touchUser=$1`;
-	    	chomp($user);
-	    	$user =~ s/<.*>//;
-	    }
+            if($formated[0] =~ /BTS/)
+    	    {
+                my @BTSID = split /\//,  $formated[1];
+                chomp(@BTSID);
+                $BTSID[0] =~ s/^\s*BSC\s*//;
+                $BTSID[1] =~ s/^\s*BTS\s*//;
+                $formated[1] = $BTSID[1]."\/".$BTSID[0];
+	        }
+	        my $user="";
+	        $formated[1] =~ /_([^_]*)$/;
+	        if(!exists $users{$1})
+	        {
+   	    	    $user = `curl http://172.24.12.75/BSC_web/Vampire/?touchUser=$1`;
+	    	    chomp($user);
+                $users{$1}=$user;
+	        }
+            else
+            {
+                $user=$users{$1};
+            }
             DB::update_record($formated[0],$formated[1],$formated[2],$formated[6].'-'.$formated[3],$user,$omc ,$dbh,$formated[4],$formated[5]);
         }
     }
