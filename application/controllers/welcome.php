@@ -72,7 +72,9 @@ class Welcome extends CI_Controller {
                 case 'showparenttype' : $this->showparenttype(); break;
                 case 'ri_by_user' : $this->ri_by_user(); break;
                 case 'releasemeta' : $this->releasemeta(); break;
+                case 'deletemeta' : $this->deletemeta(); break;
                 case 'releaseparent' : $this->releaseparent(); break;
+                case 'deleteparent' : $this->deleteparent(); break;
                 case 'ip' : $this->ip(); break;
                 case 'updatenote' : $this->updatenote(); break;
                 case 'login' : $this->login(); break;
@@ -208,11 +210,29 @@ class Welcome extends CI_Controller {
         extract($_REQUEST);
         return $this->db->query('select id_meta from link where id_parent = '.$id_parent)->result();
     }
+    public function deletemeta()
+    {
+        extract($_REQUEST);
+        $this->db->query('DELETE from meta where id = "'.$meta_id.'"');
+        $this->db->query('DELETE from link where id_meta = "'.$meta_id.'"');
+        $this->myri();
+    }
     public function releasemeta($newuser="")
     {
         extract($_REQUEST);
         $this->db->query('update meta set USER = "'.$newuser.'" where id = "'.$meta_id.'"');
         $this->showmeta();
+    }
+    public function deleteparent()
+    {
+        extract($_REQUEST);
+        $this->db->query('DELETE from parent where id = "'.$parent_id.'"');
+        foreach ($this->metas_by_parent($parent_id) as $meta_id)
+        {
+            $this->db->query('DELETE from meta where id = '.$meta_id->id_meta);
+        }
+        $this->db->query('DELETE from link where id_parent = "'.$parent_id.'"');
+        $this->myri();
     }
     public function releaseparent($newuser="")
     {

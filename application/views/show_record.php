@@ -88,6 +88,7 @@ foreach($table as $row)
     if($row['parent_user']==$vampireuser || 'naniw' == $vampireuser)
     {
         addButton('release','Release','?category=releaseparent&parent_id='.$row['parent_id']);
+        addButton('delete','Delete','?category=deleteparent&parent_id='.$row['parent_id']);
         addButton('transfer','Transfer','javascript:transferparent('.$row['parent_id'].')');
     }
     ?> <a title="<?=$row['parent_note']?>" href="?category=showparent&parent_id=<?=$row['parent_id']?>"><?=$row['parent_sn']?></a><?php
@@ -109,6 +110,7 @@ foreach($table as $row)
     if($row['meta_user']==$vampireuser  || 'naniw' == $vampireuser)
     {
 	addButton('release','Release','?category=releasemeta&meta_id='.$row['meta_id']);
+	addButton('delete','Delete','?category=deletemeta&meta_id='.$row['meta_id']);
 	addButton('transfer','Transfer','javascript:transfermeta('.$row['meta_id'].')');
     }
     ?> <a title="<?php echo preg_replace('/^.*\-/','',$row['meta_sn']);?>" href="?category=showmeta&meta_id=<?=$row['meta_id']?>"><?php echo preg_replace('/\-.*$/','',$row['meta_sn']); ?></a><?php
