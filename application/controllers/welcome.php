@@ -100,13 +100,19 @@ class Welcome extends CI_Controller {
         session_destroy();
         $this->login();
     }
-    private function registercsl($user)
+    private function registercsl($user,$checked="off")
     {
         session_register('csl');
         $_SESSION['csl']=$user;
+	if($checked == "on")
+	    setcookie('csl',$user,time()+3600*24*365);
     }
     private function logged()
     {
+	if(!isset($_SESSION['csl']) && isset($_COOKIE['csl']))
+	{
+	    $_SESSION['csl'] = $_COOKIE['csl'];
+	}
         return isset($_SESSION['csl']);
     }
     public function touchUser($touchUser)
@@ -167,7 +173,7 @@ class Welcome extends CI_Controller {
 
         if($login_success)
         {
-            $this->registercsl($user);
+            $this->registercsl($user,$keeplogin);
             $this->myri();
             return;
         }
