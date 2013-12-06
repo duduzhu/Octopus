@@ -54,8 +54,8 @@ sub clear_isolate
             my $remove = $dbh->prepare("DELETE from parent where id=$p_id");
             $remove->execute();
 
-            my $remove_his = $dbh->prepare("DELETE from history where id_parent=$p_id");
-            $remove_his->execute();
+            #my $remove_his = $dbh->prepare("DELETE from history where id_parent=$p_id");
+            #$remove_his->execute();
         }
     }
 
@@ -100,9 +100,9 @@ sub get_or_insert
     if(my $row = $sth->fetchrow_hashref())
     {
         my $id = $row->{id};
-        if(!$row->{USER})
+        if($user && !$row->{USER})
         {
-            #print ("UPDATE $table SET USER=\'$user\' where id=$id\n");
+	    print "$row->{USER} -> $user\n";
             $dbh->do("UPDATE $table SET USER=\'$user\' where id=$id");
         }
         $dbh->do("UPDATE $table SET SOURCE=\'$source\' where id=$id");
@@ -190,7 +190,7 @@ sub update_link
             #Things changed
             {
                 {
-                    $dbh->do("INSERT INTO history (id_meta, id_parent, TIMESTAMP) VALUES ($meta_id, \'$parent_id\', \'$recordtimestamp\')");
+                    #$dbh->do("INSERT INTO history (id_meta, id_parent, TIMESTAMP) VALUES ($meta_id, \'$parent_id\', \'$recordtimestamp\')");
                     $dbh->do("UPDATE link SET id_parent=\'$parent_id\' where id_meta=\'$meta_id\'");
                 }
             }
@@ -203,7 +203,7 @@ sub update_link
     #It does not exist
     {
         $dbh->do("INSERT INTO link (id_meta, id_parent, TIMESTAMP) VALUES(\'$meta_id\',\'$parent_id\',\'$recordtimestamp\')");
-        $dbh->do("INSERT INTO history (id_meta, id_parent, TIMESTAMP) VALUES(\'$meta_id\',\'$parent_id\',\'$recordtimestamp\')");
+        #$dbh->do("INSERT INTO history (id_meta, id_parent, TIMESTAMP) VALUES(\'$meta_id\',\'$parent_id\',\'$recordtimestamp\')");
     }
 }
 

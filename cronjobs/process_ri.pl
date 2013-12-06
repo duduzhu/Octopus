@@ -37,7 +37,6 @@ foreach (@filelist)
             chomp($clean);
             @formated=(@formated,$clean);
         }
-        print "$formated[1]\n";
         if(exists $ENV{$formated[2]} && $formated[0] && $formated[1] && $formated[3] )
         {
             if($formated[0] =~ /BTS/)
@@ -52,7 +51,7 @@ foreach (@filelist)
 	        $formated[1] =~ /_([^_]*)$/;
 	        if(!exists $users{$1})
 	        {
-   	    	    $user = `curl http://172.24.12.75/BSC_web/Vampire/?touchUser=$1`;
+   	    	    $user = `curl -s http://172.24.12.75/BSC_web/Vampire/?touchUser=$1`;
 	    	    chomp($user);
                 $users{$1}=$user;
 	        }

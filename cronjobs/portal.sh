@@ -22,10 +22,10 @@ rm -rf $TEMPDIR/*
 
 function flush_RI ()
 {
-    curl -k -u axadmin:omc3 "https://$1/ensusm/ricgibin/eri.cgi?ensusm=ensusm&username=axadmin&action=Generate&equipment=bts&id=9";
-    curl -k -u axadmin:omc3 "https://$1/ensusm/ricgibin/eri.cgi?ensusm=ensusm&username=axadmin&action=Generate&equipment=mfs&id=10";
-    curl -k -u axadmin:omc3 "https://$1/ensusm/ricgibin/eri.cgi?ensusm=ensusm&username=axadmin&action=Generate&equipment=bsc&id=11";
-    curl -k -u axadmin:omc3 "https://$1/ensusm/ricgibin/eri.cgi?ensusm=ensusm&username=axadmin&action=Generate&equipment=tc&id=12";
+    curl -s -k -u axadmin:omc3 "https://$1/ensusm/ricgibin/eri.cgi?ensusm=ensusm&username=axadmin&action=Generate&equipment=bts&id=9";
+    curl -s -k -u axadmin:omc3 "https://$1/ensusm/ricgibin/eri.cgi?ensusm=ensusm&username=axadmin&action=Generate&equipment=mfs&id=10";
+    curl -s -k -u axadmin:omc3 "https://$1/ensusm/ricgibin/eri.cgi?ensusm=ensusm&username=axadmin&action=Generate&equipment=bsc&id=11";
+    curl -s -k -u axadmin:omc3 "https://$1/ensusm/ricgibin/eri.cgi?ensusm=ensusm&username=axadmin&action=Generate&equipment=tc&id=12";
 }
 
 rm -rf $TEMPDIR/*;

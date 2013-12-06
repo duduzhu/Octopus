@@ -66,7 +66,7 @@ class Welcome extends CI_Controller {
                 case 'allri' : $this->allri(); break;
                 case 'ownparent' : $this->ownparent(); break;
                 case 'ownmeta' : $this->ownmeta(); break;
-                case 'showmeta' : $this->showmeta(); break;
+                #case 'showmeta' : $this->showmeta(); break;
                 case 'showmetatype' : $this->showmetatype(); break;
                 case 'showparent' : $this->showparent(); break;
                 case 'showparenttype' : $this->showparenttype(); break;
@@ -221,7 +221,7 @@ class Welcome extends CI_Controller {
     {
         extract($_REQUEST);
         $this->db->query('update meta set USER = "'.$newuser.'" where id = "'.$meta_id.'"');
-        $this->showmeta();
+        $this->myri();
     }
     public function deleteparent()
     {
@@ -252,7 +252,7 @@ class Welcome extends CI_Controller {
             $metaid=$meta_id;
         }
         $this->db->query('update meta set USER = "'.$this->get_current_user().'" where id = "'.$metaid.'"');
-        $this->showmeta();
+        $this->myri();
     }
     public function ownparent()
     {
@@ -374,7 +374,7 @@ class Welcome extends CI_Controller {
             $this->db->query('update parent set NOTE = \''.$note.'\' where sn = "'.$id.'"');
         $this->myri();
     }
-    public function showmeta()
+    /*public function showmeta()
     {
         extract($_REQUEST);
         $data['vampireuser']=$this->get_current_user();
@@ -394,7 +394,7 @@ class Welcome extends CI_Controller {
         $this->load->view('header', array('vampireuser' => $this->get_current_user()));
 		$this->load->view('show_record',$data);
 		$this->load->view('tail');
-    }
+    }*/
     public function transferparent()
     {
         extract($_REQUEST);

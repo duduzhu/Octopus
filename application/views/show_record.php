@@ -80,7 +80,8 @@ foreach($table as $row)
     ?> <a href="?category=showparenttype&parent_type=<?=$row['parent_type']?>"><?=$row['parent_type']?></a><?php
     echo "</td>";
 
-    echo "<td>";
+    echo "<td title=\"".$row['parent_note']."\" >";
+    ?> <a href="?category=showparent&parent_id=<?=$row['parent_id']?>"><?=$row['parent_sn']?></a><?php
     if(($row['parent_user']==""&&$row['parent_sn']!=""&&$vampireuser!='anonymous')|| 'naniw' == $vampireuser)
     {
         addButton('declare','Declare','?category=ownparent&parent_id='.$row['parent_id']);
@@ -91,7 +92,6 @@ foreach($table as $row)
         addButton('delete','Delete','?category=deleteparent&parent_id='.$row['parent_id']);
         addButton('transfer','Transfer','javascript:transferparent('.$row['parent_id'].')');
     }
-    ?> <a title="<?=$row['parent_note']?>" href="?category=showparent&parent_id=<?=$row['parent_id']?>"><?=$row['parent_sn']?></a><?php
     echo "</td>";
 
     echo "<td>";
@@ -104,6 +104,7 @@ foreach($table as $row)
 
     echo "<td>";
     if(($row['meta_user']==""&&$row['meta_sn']!=""&&$vampireuser!='anonymous')|| 'naniw' == $vampireuser)
+    ?> <a title="<?php echo preg_replace('/^.*\-/','',$row['meta_sn']);?>" ><?php echo preg_replace('/\-.*$/','',$row['meta_sn']); ?></a><?php
     {
 	addButton('declare','Declare','?category=ownmeta&meta_id='.$row['meta_id']);
     }
@@ -113,7 +114,6 @@ foreach($table as $row)
 	addButton('delete','Delete','?category=deletemeta&meta_id='.$row['meta_id']);
 	addButton('transfer','Transfer','javascript:transfermeta('.$row['meta_id'].')');
     }
-    ?> <a title="<?php echo preg_replace('/^.*\-/','',$row['meta_sn']);?>" href="?category=showmeta&meta_id=<?=$row['meta_id']?>"><?php echo preg_replace('/\-.*$/','',$row['meta_sn']); ?></a><?php
     echo "</td>";
 
     echo "<td>";
