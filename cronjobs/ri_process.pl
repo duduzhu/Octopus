@@ -46,15 +46,14 @@ foreach (@filelist)
                 $BTSID[0] =~ s/^\s*BSC\s*//;
                 $BTSID[1] =~ s/^\s*BTS\s*//;
                 $formated[1] = $BTSID[1]."\/".$BTSID[0];
-	        }
-	        my $user="";
-	        $formated[1] =~ /_([^_]*)$/;
-	        if(!exists $users{$1})
-	        {
-   	    	    $user = `curl -s http://172.24.12.75/BSC_web/Vampire/?touchUser=$1`;
-	    	    chomp($user);
+	    }
+	    my $user="";
+	    $formated[1] =~ /_([^_]*)$/;
+	    if(!exists $users{$1})
+	    {
+   	        $user = DB::get_csl_by_suffix($1,$dbh);
                 $users{$1}=$user;
-	        }
+	    }
             else
             {
                 $user=$users{$1};

@@ -1,4 +1,5 @@
 #!/bin/bash
+. BASH.lib
 . config.sh
 TEMPDIR=/tmp/VAMPIRE;
 
@@ -35,11 +36,19 @@ do
     PING $host
     if [ $? == 0 ]
     then
-        flush_RI $host >>/dev/null;
         expect putKey -i $host -u axadmin -p omc3;
         mkdir $TEMPDIR/$host;
+
+        flush_RI $host >>/dev/null;
         scp axadmin@$host:/alcatel/var/share/AFTR/ARIE/*.csv $TEMPDIR/$host
-        perl process_ri.pl $host $TEMPDIR/$host/*
+        perl ri_process.pl $host $TEMPDIR/$host/*
+
+	scp INFOEXPORT.CMD axadmin@$host:/tmp/
+	ssh axadmin@$host "rm /alcatel/var/share/AFTR/ACIE/ACIE_NLexport_Dir10/*"
+	ssh axadmin@$host "/alcatel/omc3/usmcmd/script/run_usmcmd -f /tmp/INFOEXPORT.CMD"
+	scp -r axadmin@$host:/alcatel/var/share/AFTR/ACIE/ACIE_NLexport_Dir10/RnlPowerControl.csv $TEMPDIR/$host.power
+	scp -r axadmin@$host:/alcatel/var/share/AFTR/ACIE/ACIE_NLexport_Dir10/Cell.csv $TEMPDIR/$host.cell
+	scp -r axadmin@$host:/alcatel/var/share/AFTR/ACIE/ACIE_NLexport_Dir10/RnlAlcatelBSC.csv $TEMPDIR/$host.bsc
     else
         perl unreachable.pl $host;
     fi
@@ -54,3 +63,4 @@ do
 done
 
 perl routing_check.pl;
+perl rio_process.pl $TEMPDIR/*.power >`ThisPath`/../application/views/rio.php

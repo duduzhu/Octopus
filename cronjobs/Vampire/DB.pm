@@ -40,6 +40,31 @@ sub own_meta_by_id
         detect_user_misalign($dbh,$m_id);
     }
 }
+sub get_csl_by_suffix
+{
+    my $csl;
+    my($suffix,$dbh)=@_;
+    $suffix=lc $suffix;
+    chomp($suffix);
+
+    my $sth = $dbh->prepare("SELECT CSL FROM alias where ALIAS='$suffix'");
+    $sth->execute();
+    my $existing_csl=$sth->fetchrow();
+    
+    if(!exists $existing_csl)
+    {
+        $csl = `curl -s http://172.24.12.75/BSC_web/Vampire/?touchUser=$suffix`;
+        if($csl)
+        {
+            my $inst = $dbh->do("INSERT INTO alias (CSL, ALIAS) VALUES('$csl','$suffix')");
+        }
+    }
+    else
+    {
+        $csl = $existing_csl;
+    }
+    return $csl;
+}
 sub clear_isolate
 {
     my ($dbh) = @_;
@@ -102,7 +127,6 @@ sub get_or_insert
         my $id = $row->{id};
         if($user && !$row->{USER})
         {
-	    print "$row->{USER} -> $user\n";
             $dbh->do("UPDATE $table SET USER=\'$user\' where id=$id");
         }
         $dbh->do("UPDATE $table SET SOURCE=\'$source\' where id=$id");

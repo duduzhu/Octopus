@@ -59,6 +59,7 @@ class Welcome extends CI_Controller {
             switch($category)
             {
                 case 'myri' : $this->myri(); break;
+                case 'rio' : $this->load->view('rio'); break;
                 case 'mx' : $this->mx(); break;
                 case 'upload' : $this->upload(); break;
                 case 'do_upload' : $this->do_upload(); break;
@@ -134,7 +135,7 @@ class Welcome extends CI_Controller {
         if(isset($csl))
         {
             $user=trim($csl);
-            $password=trim($password);
+            if(isset($password))$password=trim($password);
         }
         else
         {

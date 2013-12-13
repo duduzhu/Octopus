@@ -18,7 +18,7 @@ if(isset($heading))
 }
 if(isset($note))
 {?>
-Note:<br />
+Note(Only English):<br />
     <form action="<?php if(isset($action))echo $action; ?>">
 	<textarea rows="3" cols="64" name="note" align="center"><?php echo $note; ?></textarea>
         <br /><input type=submit value="Update Note" />
