@@ -49,9 +49,7 @@ sub get_csl_by_suffix
 
     my $sth = $dbh->prepare("SELECT CSL FROM alias where ALIAS='$suffix'");
     $sth->execute();
-    my $existing_csl=$sth->fetchrow();
-    
-    if(!exists $existing_csl)
+    if(!(my $existing_csl=$sth->fetchrow()))
     {
         $csl = `curl -s http://172.24.12.75/BSC_web/Vampire/?touchUser=$suffix`;
         if($csl)

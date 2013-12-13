@@ -49,6 +49,10 @@ class Welcome extends CI_Controller {
 	{
 	    $this->touchUser($touchUser); return;
 	}
+        if(isset($rio))
+	{
+            $this->load->view('rio'); return;
+	}
         if(isset($preloginuser))
             $this->registercsl($preloginuser);
 
@@ -59,7 +63,6 @@ class Welcome extends CI_Controller {
             switch($category)
             {
                 case 'myri' : $this->myri(); break;
-                case 'rio' : $this->load->view('rio'); break;
                 case 'mx' : $this->mx(); break;
                 case 'upload' : $this->upload(); break;
                 case 'do_upload' : $this->do_upload(); break;

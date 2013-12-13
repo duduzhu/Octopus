@@ -1,7 +1,7 @@
 #!/usr/bin/perl use strict;
 print "<html><head><title>GSM Lab RIO Report</title></head></body>\n";
 print "<h1>LastUpdate: ".`date`."</h1>\n";
-print "<table border="1" ><thead><th>BSC</th><th>LAC-CI</th><th>OMC-R</th><th>Attenu</th></thead>\n";
+print "<table border=\"1\" ><thead><th>BSC</th><th>LAC-CI</th><th>OMC-R</th><th>Attenu</th></thead>\n";
 my @power_list=@ARGV;
 foreach my $power_file (@power_list)
 {
@@ -28,9 +28,11 @@ foreach my $power_file (@power_list)
             my @power_a = split(";");
             $result_300{$power_a[$powerid]}=$power_a[$atten];
         }
-        my $omcr = $power_file;
-	$omcr =~ s/\.power//;
-        my $bsc_file = "$omcr.bsc";
+        my $prefix = $power_file;
+	    $prefix =~ s/\.power$//;
+        my $omcr = $prefix;
+        $omcr =~ s/^.*\///;
+        my $bsc_file = "$prefix.bsc";
         open(BSC_INFILE, "$bsc_file") || die "open $bsc_file failed \n";
         <BSC_INFILE>;
         my $bsc_col=<BSC_INFILE>;
@@ -51,7 +53,7 @@ foreach my $power_file (@power_list)
             my @bsc_a = split(";");
             $bscid_userlabel{$bsc_a[$bsc_id_col]} = $bsc_a[$bsc_userlabel_col];
         }
-        my $cell_file = "$omcr.cell";
+        my $cell_file = "$prefix.cell";
         open(CELL_INFILE, "$cell_file") or die;
         <CELL_INFILE>;
         my $cell_col=<CELL_INFILE>;
@@ -96,7 +98,8 @@ foreach my $power_file (@power_list)
 		if($ATT < 300)
 		{
 		 my $BSC = $bscid_userlabel{$bsc_id};
-		 if(!($BSC =~ /LOAD|BSC20D/)){
+#if(!($BSC =~ /(LOAD|BSC20D)/))
+         {
 		    $cell_a[$cgi]  =~ /lac (\d+)}.*ci (\d+)}/;
 		    my $LAC=$1;
 		    my $CI=$2;
